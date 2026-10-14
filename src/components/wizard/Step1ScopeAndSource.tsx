@@ -383,11 +383,116 @@ export const Step1ScopeAndSource: React.FC<Step1ScopeAndSourceProps> = ({
               )}
             </div>
 
-            {/* Aria Suite Multi-Select */}
-            <div className="space-y-1.5 pt-2 border-t border-slate-900">
-              <label className="text-[11px] font-medium text-slate-400">Aria Suite Enterprise Management</label>
-              <div className="flex flex-wrap gap-2">
-                {['Operations', 'Automation', 'Operations for Networks (vRNI)', 'Log Insight'].map((suite) => {
+            {/* Aria Operations & Automation Management Stack with Live Sizing Impact */}
+            <div className="space-y-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <label className="text-xs font-bold text-slate-900 block">
+                    VMware Aria Management & Automation Plane
+                  </label>
+                  <p className="text-[11px] text-slate-500">
+                    Include or exclude Aria analytics and orchestration appliances from host compute & RAM reservations.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Aria Operations Toggle */}
+                <div className={`p-3 rounded-xl border transition-all ${
+                  wizardState.assumptions?.ariaOperationsIncluded !== false
+                    ? 'bg-blue-50/60 border-blue-300 ring-1 ring-blue-500/20'
+                    : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">Aria Operations</span>
+                      <span className="text-[11px] text-slate-500 block">Fleet telemetry & capacity forecasting</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={wizardState.assumptions?.ariaOperationsIncluded !== false}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          const currentSuite = wizardState.sourceHypervisorConfig.ariaSuite;
+                          const updatedSuite = enabled
+                            ? Array.from(new Set([...currentSuite, 'Operations']))
+                            : currentSuite.filter(s => s !== 'Operations');
+                          onChange((prev) => ({
+                            ...prev,
+                            assumptions: {
+                              ...prev.assumptions,
+                              ariaOperationsIncluded: enabled
+                            },
+                            sourceHypervisorConfig: {
+                              ...prev.sourceHypervisorConfig,
+                              ariaSuite: updatedSuite
+                            }
+                          }));
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                  <div className="mt-2 text-[10px] font-mono text-slate-600 flex items-center justify-between border-t border-slate-200/60 pt-1.5">
+                    <span>Sizing Overhead:</span>
+                    <span className="font-semibold text-blue-700">
+                      {wizardState.assumptions?.ariaOperationsIncluded !== false ? '+3% RAM / +2% CPU Reserved' : 'Excluded from Sizing'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Aria Automation Toggle */}
+                <div className={`p-3 rounded-xl border transition-all ${
+                  wizardState.assumptions?.ariaAutomationIncluded !== false
+                    ? 'bg-blue-50/60 border-blue-300 ring-1 ring-blue-500/20'
+                    : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-bold text-slate-900 block">Aria Automation</span>
+                      <span className="text-[11px] text-slate-500 block">Self-service catalog & Cloud Assembly</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={wizardState.assumptions?.ariaAutomationIncluded !== false}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          const currentSuite = wizardState.sourceHypervisorConfig.ariaSuite;
+                          const updatedSuite = enabled
+                            ? Array.from(new Set([...currentSuite, 'Automation']))
+                            : currentSuite.filter(s => s !== 'Automation');
+                          onChange((prev) => ({
+                            ...prev,
+                            assumptions: {
+                              ...prev.assumptions,
+                              ariaAutomationIncluded: enabled
+                            },
+                            sourceHypervisorConfig: {
+                              ...prev.sourceHypervisorConfig,
+                              ariaSuite: updatedSuite
+                            }
+                          }));
+                        }}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                  <div className="mt-2 text-[10px] font-mono text-slate-600 flex items-center justify-between border-t border-slate-200/60 pt-1.5">
+                    <span>Sizing Overhead:</span>
+                    <span className="font-semibold text-blue-700">
+                      {wizardState.assumptions?.ariaAutomationIncluded !== false ? '+3% RAM / +2% CPU Reserved' : 'Excluded from Sizing'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Optional Network and Log Analytics Add-ons */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {['Operations for Networks (vRNI)', 'Log Insight'].map((suite) => {
                   const isChecked = wizardState.sourceHypervisorConfig.ariaSuite.includes(suite);
                   return (
                     <button
@@ -407,8 +512,8 @@ export const Step1ScopeAndSource: React.FC<Step1ScopeAndSourceProps> = ({
                       }}
                       className={`px-2.5 py-1 rounded-lg text-xs border transition cursor-pointer ${
                         isChecked
-                          ? 'bg-indigo-950 border-indigo-600 text-indigo-300 font-semibold'
-                          : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                          ? 'bg-blue-50 border-blue-300 text-blue-700 font-semibold'
+                          : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       {isChecked ? '✓ ' : '+ '}
@@ -956,9 +1061,9 @@ export const Step1ScopeAndSource: React.FC<Step1ScopeAndSourceProps> = ({
         <button
           type="button"
           onClick={onNext}
-          className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer transition-all hover:scale-[1.02]"
+          className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs cursor-pointer transition"
         >
-          <span>Continue to Step 2: Transit & Security</span>
+          <span>Continue to Step 2: Transit & Routing</span>
         </button>
       </div>
     </div>

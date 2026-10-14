@@ -111,7 +111,7 @@ export const CustomizationProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (e) {
       console.warn('Failed to read theme from localStorage', e);
     }
-    return 'dark';
+    return 'light';
   });
 
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(() => {

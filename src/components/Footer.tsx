@@ -86,11 +86,6 @@ export const Footer: React.FC = () => {
                   Hybrid Blueprint Generator
                 </Link>
               </li>
-              <li>
-                <Link to="/blueprints" className="hover:text-cyan-400 transition-colors">
-                  Interactive Blueprints
-                </Link>
-              </li>
             </ul>
           </div>
 

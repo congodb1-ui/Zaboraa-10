@@ -78,10 +78,10 @@ export const HomePage: React.FC = () => {
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
-                to="/blueprints"
+                to="/tools/design-generator"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-sm transition-all"
               >
-                <span>Explore Topology Mapper</span>
+                <span>Launch Architecture Wizard</span>
               </Link>
             </div>
           </div>
@@ -103,10 +103,10 @@ export const HomePage: React.FC = () => {
             </p>
           </div>
           <Link
-            to="/blueprints"
+            to="/tools/design-generator"
             className="inline-flex items-center gap-2 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
           >
-            <span>View All Topology Blueprints</span>
+            <span>Launch Hybrid Blueprint Generator</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

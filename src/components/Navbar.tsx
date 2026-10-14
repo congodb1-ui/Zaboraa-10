@@ -280,11 +280,6 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Direct Link: Blueprints */}
-          <NavLink to="/blueprints" className={navLinkClass}>
-            Blueprints
-          </NavLink>
-
           {/* Direct Link: Roadmap */}
           <NavLink to="/roadmap" className={navLinkClass}>
             Roadmap
@@ -545,13 +540,6 @@ export const Navbar: React.FC = () => {
                 · Automated Blueprint Generator
               </Link>
             </div>
-            <NavLink
-              to="/blueprints"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block px-3 py-2 rounded-lg text-sm font-semibold text-slate-200 hover:bg-slate-900"
-            >
-              Interactive Blueprints
-            </NavLink>
             <NavLink
               to="/roadmap"
               onClick={() => setMobileMenuOpen(false)}

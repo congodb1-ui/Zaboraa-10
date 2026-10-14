@@ -313,7 +313,7 @@ export const SearchCommandModal: React.FC = () => {
                     key={d.id}
                     onClick={() => handleNavigateWithQuery(() => {
                       setSelectedDiagram(d);
-                      navigate('/blueprints');
+                      navigate('/tools/design-generator');
                     })}
                     className="w-full text-left p-3 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800/80 flex items-center justify-between group transition-colors cursor-pointer"
                   >

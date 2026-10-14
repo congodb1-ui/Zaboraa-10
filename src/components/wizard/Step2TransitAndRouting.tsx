@@ -414,31 +414,31 @@ export const Step2TransitAndRouting: React.FC<Step2TransitAndRoutingProps> = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono">Environment Name</label>
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Environment Name</label>
                         <input
                           type="text"
                           value={env.name}
                           onChange={(e) => onUpdateEnvironment(env.id, { name: e.target.value })}
-                          className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-slate-200 text-xs focus:border-cyan-500 focus:outline-none"
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded text-slate-900 text-xs focus:border-blue-500 focus:outline-none"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono">Region / Facility</label>
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Region / Facility</label>
                         <input
                           type="text"
                           value={env.region}
                           onChange={(e) => onUpdateEnvironment(env.id, { region: e.target.value })}
-                          className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-slate-200 text-xs focus:border-cyan-500 focus:outline-none"
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded text-slate-900 text-xs focus:border-blue-500 focus:outline-none"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono">Platform</label>
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Platform</label>
                         <select
                           value={env.platform}
                           onChange={(e) => onUpdateEnvironment(env.id, { platform: e.target.value as CloudPlatformType })}
-                          className="w-full px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-slate-200 text-xs focus:border-cyan-500 focus:outline-none"
+                          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-slate-900 text-xs focus:border-blue-500 focus:outline-none"
                         >
                           <option value="Nutanix AHV">Nutanix AHV (On-Premises)</option>
                           <option value="Nutanix NC2 on Azure">Nutanix NC2 on Azure</option>
@@ -453,11 +453,11 @@ export const Step2TransitAndRouting: React.FC<Step2TransitAndRoutingProps> = ({
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono">Tier Role</label>
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Tier Role</label>
                         <select
                           value={env.role}
                           onChange={(e) => onUpdateEnvironment(env.id, { role: e.target.value as EnvironmentRole })}
-                          className="w-full px-2 py-1.5 bg-slate-900 border border-slate-800 rounded text-slate-200 text-xs focus:border-cyan-500 focus:outline-none"
+                          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-slate-900 text-xs focus:border-blue-500 focus:outline-none"
                         >
                           <option value="Production">Production</option>
                           <option value="Disaster Recovery">Disaster Recovery</option>
@@ -467,7 +467,7 @@ export const Step2TransitAndRouting: React.FC<Step2TransitAndRoutingProps> = ({
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono">Host Count</label>
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Host Count</label>
                         <input
                           type="number"
                           min={0}
@@ -478,41 +478,60 @@ export const Step2TransitAndRouting: React.FC<Step2TransitAndRoutingProps> = ({
                             onUpdateEnvironment(env.id, {
                               hostCount: count,
                               totalVcpu: count * 36,
-                              totalRamGB: count * 576
+                              totalRamGB: count * (env.totalRamGB > 0 && env.hostCount > 0 ? Math.round(env.totalRamGB / env.hostCount) : 576)
                             });
                           }}
-                          className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-slate-200 text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded text-slate-900 text-xs font-mono focus:border-blue-500 focus:outline-none"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono">Storage Footprint (TB)</label>
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Total RAM (GB)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={65536}
+                          value={env.totalRamGB}
+                          onChange={(e) => onUpdateEnvironment(env.id, { totalRamGB: Math.max(0, Number(e.target.value)) })}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded text-slate-900 text-xs font-mono focus:border-blue-500 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Storage Footprint (TB)</label>
                         <input
                           type="number"
                           min={0}
                           max={2000}
                           value={env.storageTB}
                           onChange={(e) => onUpdateEnvironment(env.id, { storageTB: Math.max(0, Number(e.target.value)) })}
-                          className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-slate-200 text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded text-slate-900 text-xs font-mono focus:border-blue-500 focus:outline-none"
                         />
                       </div>
 
                       <div className="space-y-1 sm:col-span-2">
-                        <label className="text-[10px] text-slate-400 uppercase font-mono">Management CIDR Block</label>
+                        <label className="text-[10px] text-slate-500 uppercase font-mono">Management CIDR Block</label>
                         <input
                           type="text"
                           value={env.cidrBlock}
                           onChange={(e) => onUpdateEnvironment(env.id, { cidrBlock: e.target.value })}
-                          className="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded text-slate-200 text-xs font-mono focus:border-cyan-500 focus:outline-none"
+                          className={`w-full px-2.5 py-1.5 bg-white border rounded text-slate-900 text-xs font-mono focus:outline-none ${
+                            env.cidrBlock && !/^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/.test(env.cidrBlock.trim())
+                              ? 'border-rose-400 focus:border-rose-500'
+                              : 'border-slate-200 focus:border-blue-500'
+                          }`}
                         />
+                        {env.cidrBlock && !/^(\d{1,3}\.){3}\d{1,3}\/\d{1,2}$/.test(env.cidrBlock.trim()) && (
+                          <p className="text-[10px] text-rose-500 font-mono mt-0.5">Invalid CIDR format (e.g. 10.240.0.0/22)</p>
+                        )}
                       </div>
                     </div>
 
-                    <div className="flex justify-end pt-2 border-t border-slate-900">
+                    <div className="flex justify-end pt-2 border-t border-slate-100">
                       <button
                         type="button"
                         onClick={() => setEditingEnvId(null)}
-                        className="px-3 py-1 rounded bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1 cursor-pointer transition"
+                        className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1 cursor-pointer transition shadow-xs"
                       >
                         <Check className="w-3.5 h-3.5" />
                         <span>Save & Collapse</span>

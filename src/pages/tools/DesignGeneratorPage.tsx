@@ -106,8 +106,6 @@ import { Step1ScopeAndSource } from '../../components/wizard/Step1ScopeAndSource
 import { Step2TransitAndRouting } from '../../components/wizard/Step2TransitAndRouting';
 import { Step3SecurityAndWAF } from '../../components/wizard/Step3SecurityAndWAF';
 import { Step4TargetAndDR } from '../../components/wizard/Step4TargetAndDR';
-import { Static4KBlueprintPreview } from '../../components/wizard/Static4KBlueprintPreview';
-import { LiveArchitectureSplitView } from '../../components/wizard/LiveArchitectureSplitView';
 
 interface VlanSubsegment {
   vlanId: number;
@@ -2435,192 +2433,69 @@ export const DesignGeneratorPage: React.FC = () => {
         </div>
       )}
 
-      {/* 4-Step Enterprise Wizard Navigation Tabs with Industry Presets & Layout Toggles */}
+      {/* 4-Step Enterprise Wizard Navigation Tabs with Industry Presets */}
       <WizardStepTabs
         currentStep={currentStep}
         onSelectStep={setCurrentStep}
         wizardState={wizardState}
         onApplyTemplate={handleApplyIndustryTemplate}
-        layoutMode={layoutMode}
-        onToggleLayoutMode={setLayoutMode}
         isCidrValid={sddcCidrValid}
         isCompatibilityValid={isCrossTierCompatible}
       />
 
-      {/* Viewport Content Router: Dedicated 4K Preview / Split View / Form-Only 4-Step Flow */}
-      {layoutMode === 'preview' ? (
-        <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 shadow-2xl animate-in fade-in">
-          <Static4KBlueprintPreview
-            spec={vectorSpec}
-            architectName={architectName}
-            projectDate={projectDate}
-            activeTemplate={activeTemplate}
-            drEngine={drEngine}
-            drRpoMinutes={drRpoMinutes}
-            onExport4K={handleExport4K}
-            showControls={true}
+      {/* 4-Step Architecture Wizard Workflow Container */}
+      <div className="space-y-6">
+        {currentStep === 1 && (
+          <Step1ScopeAndSource
+            wizardState={wizardState}
+            onChange={handleWizardStateChange}
+            onNext={() => setCurrentStep(2)}
           />
-        </div>
-      ) : layoutMode === 'split' ? (
-        <LiveArchitectureSplitView
-          layoutMode="split"
-          leftPanel={
-            <div className="space-y-6">
-              {currentStep === 1 && (
-                <Step1ScopeAndSource
-                  wizardState={wizardState}
-                  onChange={handleWizardStateChange}
-                  onNext={() => setCurrentStep(2)}
-                />
-              )}
-              {currentStep === 2 && (
-                <Step2TransitAndRouting
-                  wizardState={wizardState}
-                  onChange={handleWizardStateChange}
-                  environments={topologyEnvironments}
-                  onUpdateEnvironment={(id, updates) =>
-                    setTopologyEnvironments((prev) =>
-                      prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
-                    )
-                  }
-                  onRemoveEnvironment={(id) => {
-                    setPendingDeleteEnvId(id);
-                    setShowDeleteEnvModal(true);
-                  }}
-                  onOpenAddEnvModal={() => setShowAddEnvModal(true)}
-                  onNext={() => setCurrentStep(3)}
-                  onPrev={() => setCurrentStep(1)}
-                />
-              )}
-              {currentStep === 3 && (
-                <Step3SecurityAndWAF
-                  wizardState={wizardState}
-                  onChange={handleWizardStateChange}
-                  onNext={() => setCurrentStep(4)}
-                  onPrev={() => setCurrentStep(2)}
-                />
-              )}
-              {currentStep === 4 && (
-                <Step4TargetAndDR
-                  wizardState={wizardState}
-                  onChange={handleWizardStateChange}
-                  onPrev={() => setCurrentStep(3)}
-                  onGenerateAI={() => setShowPreFlightModal(true)}
-                  onSaveBlueprint={handlePersistLegacyState}
-                  onExportJson={handleExportBlueprintJSON}
-                  onExportExcel={handleExportBOMExcel}
-                  onExport4K={() => handleExport4K('png')}
-                  onOpenDossier={() => setShowDossierModal(true)}
-                />
-              )}
-            </div>
-          }
-          rightPanel={
-            <Static4KBlueprintPreview
-              spec={vectorSpec}
-              architectName={architectName}
-              projectDate={projectDate}
-              activeTemplate={activeTemplate}
-              drEngine={drEngine}
-              drRpoMinutes={drRpoMinutes}
-              onExport4K={handleExport4K}
-              showControls={true}
-            />
-          }
-          metrics={{
-            totalHosts: topologyMetrics.totalHosts,
-            totalCores: topologyMetrics.totalCores,
-            totalLogicalThreads: topologyMetrics.totalLogicalThreads,
-            totalUsableRamGB: topologyMetrics.totalUsableRamGB,
-            totalUsableStorageTB: topologyMetrics.totalUsableStorageTB,
-            targetSku: wizardState.targetNodeSku,
-            targetNodes: wizardState.targetNodeCount,
-            drSla: `${drRpoMinutes}m RPO / ${drRtoMinutes}m RTO`,
-            n1Viable: topologyMetrics.n1Viable,
-            platformName: cloudPlatform
-          }}
-        />
-      ) : (
-        /* Standard Form-Only 4-Step Wizard Flow */
-        <div className="space-y-6">
-          {currentStep === 1 && (
-            <Step1ScopeAndSource
-              wizardState={wizardState}
-              onChange={handleWizardStateChange}
-              onNext={() => setCurrentStep(2)}
-            />
-          )}
+        )}
 
-          {currentStep === 2 && (
-            <Step2TransitAndRouting
-              wizardState={wizardState}
-              onChange={handleWizardStateChange}
-              environments={topologyEnvironments}
-              onUpdateEnvironment={(id, updates) =>
-                setTopologyEnvironments((prev) =>
-                  prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
-                )
-              }
-              onRemoveEnvironment={(id) => {
-                setPendingDeleteEnvId(id);
-                setShowDeleteEnvModal(true);
-              }}
-              onOpenAddEnvModal={() => setShowAddEnvModal(true)}
-              onNext={() => setCurrentStep(3)}
-              onPrev={() => setCurrentStep(1)}
-            />
-          )}
+        {currentStep === 2 && (
+          <Step2TransitAndRouting
+            wizardState={wizardState}
+            onChange={handleWizardStateChange}
+            environments={topologyEnvironments}
+            onUpdateEnvironment={(id, updates) =>
+              setTopologyEnvironments((prev) =>
+                prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
+              )
+            }
+            onRemoveEnvironment={(id) => {
+              setPendingDeleteEnvId(id);
+              setShowDeleteEnvModal(true);
+            }}
+            onOpenAddEnvModal={() => setShowAddEnvModal(true)}
+            onNext={() => setCurrentStep(3)}
+            onPrev={() => setCurrentStep(1)}
+          />
+        )}
 
-          {currentStep === 3 && (
-            <Step3SecurityAndWAF
-              wizardState={wizardState}
-              onChange={handleWizardStateChange}
-              onNext={() => setCurrentStep(4)}
-              onPrev={() => setCurrentStep(2)}
-            />
-          )}
+        {currentStep === 3 && (
+          <Step3SecurityAndWAF
+            wizardState={wizardState}
+            onChange={handleWizardStateChange}
+            onNext={() => setCurrentStep(4)}
+            onPrev={() => setCurrentStep(2)}
+          />
+        )}
 
-          {currentStep === 4 && (
-            <Step4TargetAndDR
-              wizardState={wizardState}
-              onChange={handleWizardStateChange}
-              onPrev={() => setCurrentStep(3)}
-              onGenerateAI={() => setShowPreFlightModal(true)}
-              onSaveBlueprint={handlePersistLegacyState}
-              onExportJson={handleExportBlueprintJSON}
-              onExportExcel={handleExportBOMExcel}
-              onExport4K={() => handleExport4K('png')}
-              onOpenDossier={() => setShowDossierModal(true)}
-              blueprintPreviewNode={
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-mono text-cyan-400 font-bold uppercase tracking-wider">
-                      Static 4K Vector Architecture Preview
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setLayoutMode('preview')}
-                      className="text-xs text-cyan-400 hover:text-cyan-300 font-mono underline cursor-pointer"
-                    >
-                      Open Dedicated 4K Vector View
-                    </button>
-                  </div>
-                  <Static4KBlueprintPreview
-                    spec={vectorSpec}
-                    architectName={architectName}
-                    projectDate={projectDate}
-                    activeTemplate={activeTemplate}
-                    drEngine={drEngine}
-                    drRpoMinutes={drRpoMinutes}
-                    onExport4K={handleExport4K}
-                    showControls={false}
-                  />
-                </div>
-              }
-            />
-          )}
-        </div>
-      )}
+        {currentStep === 4 && (
+          <Step4TargetAndDR
+            wizardState={wizardState}
+            onChange={handleWizardStateChange}
+            onPrev={() => setCurrentStep(3)}
+            onGenerateAI={() => setShowPreFlightModal(true)}
+            onSaveBlueprint={handlePersistLegacyState}
+            onExportJson={handleExportBlueprintJSON}
+            onExportExcel={handleExportBOMExcel}
+            onExport4K={() => handleExport4K('png')}
+            onOpenDossier={() => setShowDossierModal(true)}
+          />
+        )}
+      </div>
 
       {/* Add Custom Environment Modal */}
       {showAddEnvModal && (

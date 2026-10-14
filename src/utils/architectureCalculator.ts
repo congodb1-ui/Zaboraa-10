@@ -29,6 +29,10 @@ export interface EngineeringAssumptions {
   storageSlackSpacePct: number;
   /** Deduplication & compression efficiency factor (default 1.0 = unassumed; >1.0 only with proven workload data) */
   storageEfficiencyRatio: number;
+  /** Whether VMware Aria Operations analytics management plane is included in host capacity reservation */
+  ariaOperationsIncluded?: boolean;
+  /** Whether VMware Aria Automation orchestration & catalog pods are included in host capacity reservation */
+  ariaAutomationIncluded?: boolean;
 }
 
 export const DEFAULT_ENGINEERING_ASSUMPTIONS: EngineeringAssumptions = {
@@ -37,7 +41,9 @@ export const DEFAULT_ENGINEERING_ASSUMPTIONS: EngineeringAssumptions = {
   hypervisorCpuReservationPct: 0.10,
   storageProtectionFactor: 1.33, // RAID-5 default
   storageSlackSpacePct: 0.20,
-  storageEfficiencyRatio: 1.0 // Unassumed baseline
+  storageEfficiencyRatio: 1.0, // Unassumed baseline
+  ariaOperationsIncluded: true,
+  ariaAutomationIncluded: true
 };
 
 export interface ClusterCapacityResult {
@@ -119,8 +125,10 @@ export function calculateClusterCapacity(
   const logicalProcessors = cluster.hyperthreading ? physicalCores * 2 : physicalCores;
   const totalRamGB = cluster.hostCount * cluster.ramPerHostGB;
 
-  // Hypervisor RAM overhead deducted exactly once
-  const usableRamGB = Math.max(0, totalRamGB * (1 - assumptions.hypervisorRamOverheadPct));
+  // Hypervisor and Aria management overhead calculation
+  const ariaRamAdd = (assumptions.ariaOperationsIncluded ? 0.03 : 0) + (assumptions.ariaAutomationIncluded ? 0.03 : 0);
+  const effectiveRamOverhead = Math.min(0.40, assumptions.hypervisorRamOverheadPct + ariaRamAdd);
+  const usableRamGB = Math.max(0, totalRamGB * (1 - effectiveRamOverhead));
 
   const rawStorageTB = cluster.hostCount * cluster.rawStoragePerHostTB;
 
@@ -132,7 +140,9 @@ export function calculateClusterCapacity(
   );
 
   // Maximum recommended vCPU workload based on surviving physical cores and oversubscription
-  const effectivePhysicalCores = physicalCores * (1 - assumptions.hypervisorCpuReservationPct);
+  const ariaCpuAdd = (assumptions.ariaOperationsIncluded ? 0.02 : 0) + (assumptions.ariaAutomationIncluded ? 0.02 : 0);
+  const effectiveCpuReservation = Math.min(0.40, assumptions.hypervisorCpuReservationPct + ariaCpuAdd);
+  const effectivePhysicalCores = physicalCores * (1 - effectiveCpuReservation);
   const maxRecommendedWorkloadVcpu = Math.floor(
     effectivePhysicalCores * assumptions.maxOversubscriptionRatio
   );

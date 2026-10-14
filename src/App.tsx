@@ -24,7 +24,6 @@ import { AriaNetworksToolPage } from './pages/tools/AriaNetworksToolPage';
 import { NutanixNC2AssessmentPage } from './pages/tools/NutanixNC2AssessmentPage';
 import { DRPlannerPage } from './pages/tools/DRPlannerPage';
 import { DesignGeneratorPage } from './pages/tools/DesignGeneratorPage';
-import { BlueprintsPage } from './pages/BlueprintsPage';
 import { RoadmapPage } from './pages/RoadmapPage';
 import { ResourcesPage } from './pages/ResourcesPage';
 import { CaseStudiesPage } from './pages/CaseStudiesPage';
@@ -170,8 +169,7 @@ const MainLayout: React.FC = () => {
           <Route path="/tools/dr-planner" element={<DRPlannerPage />} />
           <Route path="/tools/design-generator" element={<DesignGeneratorPage />} />
 
-          {/* 4. Standalone Dedicated Blueprint, Roadmap, Resources, Case Studies, About */}
-          <Route path="/blueprints" element={<BlueprintsPage />} />
+          {/* 4. Standalone Dedicated Roadmap, Resources, Case Studies, About */}
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/resources" element={<ResourcesPage />} />
           <Route path="/resources/:tab" element={<ResourcesPage />} />
