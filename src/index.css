@@ -173,7 +173,7 @@
 
 .light-high-contrast .text-slate-400,
 .light-high-contrast .text-slate-500 {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 
 /* Primary Accents: Professional Blue */
@@ -421,18 +421,36 @@ button:disabled {
   color: #0f172a !important;
 }
 
-/* 3. Muted Utility Classes Override (Fixes Invisible Labels/Subtext) */
+/* 3. Comprehensive Card Paragraphs, Subtitles & Descriptions Contrast */
+.light-high-contrast p,
+.light-high-contrast li,
+.light-high-contrast label {
+  color: #1e293b !important;
+}
+
+/* 4. Muted Utility Classes Override (Fixes Faded Subtext & Descriptions) */
 .light-high-contrast .text-slate-200,
 .light-high-contrast .text-slate-300,
 .light-high-contrast .text-slate-400,
 .light-high-contrast .text-slate-500,
 .light-high-contrast .text-gray-300,
 .light-high-contrast .text-gray-400,
+.light-high-contrast .text-gray-500,
 .light-high-contrast .text-white {
-  color: #1e293b !important; /* High contrast dark slate */
+  color: #334155 !important; /* High contrast dark slate for descriptions */
 }
 
-/* 4. Ensure Text Stays White on Filled Accent Buttons & Badges in Light Mode */
+/* 5. Ensure Headings Stay Crisp Deep Navy */
+.light-high-contrast h1,
+.light-high-contrast h2,
+.light-high-contrast h3,
+.light-high-contrast h4,
+.light-high-contrast h5,
+.light-high-contrast h6 {
+  color: #0f172a !important;
+}
+
+/* 6. Ensure Text Stays White on Filled Accent Buttons & Badges in Light Mode */
 .light-high-contrast button.bg-cyan-500,
 .light-high-contrast button.bg-cyan-600,
 .light-high-contrast button.bg-blue-600,
@@ -443,7 +461,7 @@ button:disabled {
   color: #ffffff !important;
 }
 
-/* 5. Hover States for Header Navigation */
+/* 7. Hover States for Header Navigation */
 .light-high-contrast header a:hover,
 .light-high-contrast header button:hover,
 .light-high-contrast nav a:hover {
