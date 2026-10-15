@@ -796,6 +796,62 @@ export const CustomizerDrawer: React.FC = () => {
                 </div>
               </div>
 
+              {/* Public-First Access & Admin Security Toggles */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <span className="font-bold text-white text-xs uppercase tracking-wider block">
+                  Access Governance & Security Controls
+                </span>
+                <p className="text-[11px] text-slate-400">
+                  Manage public-first accessibility for cloud migration calculators, topology visualizers, and migration runbooks.
+                </p>
+
+                <div className="space-y-3 pt-1">
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900 border border-slate-800">
+                    <div>
+                      <span className="text-white font-semibold text-xs block">Public Platform Access</span>
+                      <span className="text-[11px] text-slate-400 block">Allow anonymous enterprise visitors to explore platforms & articles</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !(siteConfig.adminSettings?.publicAccessEnabled ?? true);
+                        updateAdminSettings({ publicAccessEnabled: next });
+                        showNotification(next ? 'Public access enabled' : 'Public access restricted');
+                      }}
+                      className={`px-3 py-1.5 rounded-lg border font-semibold text-xs transition-colors cursor-pointer ${
+                        (siteConfig.adminSettings?.publicAccessEnabled ?? true)
+                          ? 'bg-emerald-950 border-emerald-500 text-emerald-300'
+                          : 'bg-slate-900 border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      {(siteConfig.adminSettings?.publicAccessEnabled ?? true) ? 'Public: ON' : 'Public: OFF'}
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900 border border-slate-800">
+                    <div>
+                      <span className="text-white font-semibold text-xs block">Require Auth for Architecture Tools</span>
+                      <span className="text-[11px] text-slate-400 block">Require user sign-in before accessing calculators & sizing tools</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = !(siteConfig.adminSettings?.authRequiredForTools ?? false);
+                        updateAdminSettings({ authRequiredForTools: next });
+                        showNotification(next ? 'Authentication required for tools' : 'Tools are open to public');
+                      }}
+                      className={`px-3 py-1.5 rounded-lg border font-semibold text-xs transition-colors cursor-pointer ${
+                        (siteConfig.adminSettings?.authRequiredForTools ?? false)
+                          ? 'bg-amber-950 border-amber-500 text-amber-300'
+                          : 'bg-slate-900 border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      {(siteConfig.adminSettings?.authRequiredForTools ?? false) ? 'Auth Required: ON' : 'Auth Required: OFF'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Quick Action Reset */}
               <div className="pt-3 flex flex-col sm:flex-row gap-2 justify-between items-center border-t border-slate-800">
                 <button
@@ -806,7 +862,9 @@ export const CustomizerDrawer: React.FC = () => {
                       layoutDensity: 'balanced',
                       headerStyle: 'glass',
                       backgroundPattern: 'tech-grid',
-                      imageAnimationsEnabled: true
+                      imageAnimationsEnabled: true,
+                      publicAccessEnabled: true,
+                      authRequiredForTools: false
                     });
                     showNotification('Reverted appearance to factory default settings');
                   }}

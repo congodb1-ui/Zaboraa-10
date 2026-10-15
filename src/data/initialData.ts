@@ -23,7 +23,9 @@ export const INITIAL_SITE_DATA: SiteConfig = {
     announcementLink: '/tools/nutanix-nc2-assessment',
     confidentialityClassification: 'CONFIDENTIAL // ARCHITECTURAL ASSESSMENT',
     clientName: 'Enterprise Cloud Migration Assessment',
-    enableAuditTelemetry: true
+    enableAuditTelemetry: true,
+    publicAccessEnabled: true,
+    authRequiredForTools: false
   },
   platformShowcases: [
     {

@@ -167,6 +167,17 @@ export const CustomizationProvider: React.FC<{ children: React.ReactNode }> = ({
           }
           if (!merged.adminSettings) {
             merged.adminSettings = INITIAL_SITE_DATA.adminSettings;
+          } else {
+            merged.adminSettings = {
+              ...INITIAL_SITE_DATA.adminSettings,
+              ...merged.adminSettings,
+              publicAccessEnabled: merged.adminSettings.publicAccessEnabled !== undefined
+                ? merged.adminSettings.publicAccessEnabled
+                : true,
+              authRequiredForTools: merged.adminSettings.authRequiredForTools !== undefined
+                ? merged.adminSettings.authRequiredForTools
+                : false
+            };
           }
           return sanitizeImagePaths(merged);
         }

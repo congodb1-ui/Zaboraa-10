@@ -179,6 +179,8 @@ export interface AdminSettings {
   confidentialityClassification: string;
   clientName: string;
   enableAuditTelemetry: boolean;
+  publicAccessEnabled: boolean;
+  authRequiredForTools: boolean;
 }
 
 export interface PlatformShowcase {
