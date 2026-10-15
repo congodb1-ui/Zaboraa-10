@@ -435,8 +435,7 @@ button:disabled {
 .light-high-contrast .text-slate-500,
 .light-high-contrast .text-gray-300,
 .light-high-contrast .text-gray-400,
-.light-high-contrast .text-gray-500,
-.light-high-contrast .text-white {
+.light-high-contrast .text-gray-500 {
   color: #334155 !important; /* High contrast dark slate for descriptions */
 }
 
@@ -451,13 +450,30 @@ button:disabled {
 }
 
 /* 6. Ensure Text Stays White on Filled Accent Buttons & Badges in Light Mode */
+.light-high-contrast .bg-cyan-400,
+.light-high-contrast .bg-cyan-500,
+.light-high-contrast .bg-cyan-600,
+.light-high-contrast .bg-blue-600,
+.light-high-contrast .bg-blue-700,
+.light-high-contrast .btn-primary,
 .light-high-contrast button.bg-cyan-500,
 .light-high-contrast button.bg-cyan-600,
 .light-high-contrast button.bg-blue-600,
 .light-high-contrast button.bg-blue-700,
-.light-high-contrast .btn-primary,
+.light-high-contrast a.bg-cyan-500,
+.light-high-contrast a.bg-cyan-600,
+.light-high-contrast a.bg-blue-600,
 .light-high-contrast [class*="bg-cyan-"] .text-white,
 .light-high-contrast [class*="bg-blue-"] .text-white {
+  color: #ffffff !important;
+}
+
+.light-high-contrast .bg-cyan-400 *,
+.light-high-contrast .bg-cyan-500 *,
+.light-high-contrast .bg-cyan-600 *,
+.light-high-contrast .bg-blue-600 *,
+.light-high-contrast .bg-blue-700 *,
+.light-high-contrast .btn-primary * {
   color: #ffffff !important;
 }
 
