@@ -160,20 +160,33 @@
   border-color: #e2e8f0 !important;
 }
 
-/* Typography contrast */
-.light-high-contrast .text-white,
-.light-high-contrast .text-slate-100 {
+/* Typography contrast for normal light background */
+.light-high-contrast p,
+.light-high-contrast span:not([class*="text-"]),
+.light-high-contrast li,
+.light-high-contrast label,
+.light-high-contrast td,
+.light-high-contrast th {
   color: #0f172a !important;
 }
 
-.light-high-contrast .text-slate-200,
-.light-high-contrast .text-slate-300 {
-  color: #334155 !important;
+.light-high-contrast h1,
+.light-high-contrast h2,
+.light-high-contrast h3,
+.light-high-contrast h4,
+.light-high-contrast h5,
+.light-high-contrast h6 {
+  color: #000000 !important;
 }
 
+.light-high-contrast .text-slate-200,
+.light-high-contrast .text-slate-300,
 .light-high-contrast .text-slate-400,
-.light-high-contrast .text-slate-500 {
-  color: #475569 !important;
+.light-high-contrast .text-slate-500,
+.light-high-contrast .text-gray-300,
+.light-high-contrast .text-gray-400,
+.light-high-contrast .text-gray-500 {
+  color: #1e293b !important;
 }
 
 /* Primary Accents: Professional Blue */
@@ -421,63 +434,30 @@ button:disabled {
   color: #0f172a !important;
 }
 
-/* 3. Comprehensive Card Paragraphs, Subtitles & Descriptions Contrast */
-.light-high-contrast p,
-.light-high-contrast li,
-.light-high-contrast label {
-  color: #1e293b !important;
-}
-
-/* 4. Muted Utility Classes Override (Fixes Faded Subtext & Descriptions) */
-.light-high-contrast .text-slate-200,
-.light-high-contrast .text-slate-300,
-.light-high-contrast .text-slate-400,
-.light-high-contrast .text-slate-500,
-.light-high-contrast .text-gray-300,
-.light-high-contrast .text-gray-400,
-.light-high-contrast .text-gray-500 {
-  color: #334155 !important; /* High contrast dark slate for descriptions */
-}
-
-/* 5. Ensure Headings Stay Crisp Deep Navy */
-.light-high-contrast h1,
-.light-high-contrast h2,
-.light-high-contrast h3,
-.light-high-contrast h4,
-.light-high-contrast h5,
-.light-high-contrast h6 {
-  color: #0f172a !important;
-}
-
-/* 6. Ensure Text Stays White on Filled Accent Buttons & Badges in Light Mode */
-.light-high-contrast .bg-cyan-400,
-.light-high-contrast .bg-cyan-500,
-.light-high-contrast .bg-cyan-600,
-.light-high-contrast .bg-blue-600,
-.light-high-contrast .bg-blue-700,
-.light-high-contrast .btn-primary,
-.light-high-contrast button.bg-cyan-500,
-.light-high-contrast button.bg-cyan-600,
-.light-high-contrast button.bg-blue-600,
-.light-high-contrast button.bg-blue-700,
-.light-high-contrast a.bg-cyan-500,
-.light-high-contrast a.bg-cyan-600,
-.light-high-contrast a.bg-blue-600,
-.light-high-contrast [class*="bg-cyan-"] .text-white,
-.light-high-contrast [class*="bg-blue-"] .text-white {
+/* 3. EXCEPTION RULE: DARK BOXES, DIALOGS, MODALS IN LIGHT MODE MUST HAVE WHITE TEXT */
+.light-high-contrast [class*="bg-slate-9"] *,
+.light-high-contrast [class*="bg-slate-8"] *,
+.light-high-contrast [class*="bg-black"] *,
+.light-high-contrast [class*="bg-gray-9"] *,
+.light-high-contrast [class*="bg-zinc-9"] *,
+.light-high-contrast .bg-slate-950 *,
+.light-high-contrast .bg-slate-900 *,
+.light-high-contrast .bg-black *,
+.light-high-contrast [data-modal] *,
+.light-high-contrast .dialog-box *,
+.light-high-contrast .modal-box * {
   color: #ffffff !important;
 }
 
-.light-high-contrast .bg-cyan-400 *,
-.light-high-contrast .bg-cyan-500 *,
-.light-high-contrast .bg-cyan-600 *,
-.light-high-contrast .bg-blue-600 *,
-.light-high-contrast .bg-blue-700 *,
-.light-high-contrast .btn-primary * {
+.light-high-contrast [class*="bg-slate-9"],
+.light-high-contrast [class*="bg-slate-8"],
+.light-high-contrast [class*="bg-black"],
+.light-high-contrast [class*="bg-gray-9"],
+.light-high-contrast [class*="bg-zinc-9"] {
   color: #ffffff !important;
 }
 
-/* 7. Hover States for Header Navigation */
+/* 4. Hover States for Header Navigation */
 .light-high-contrast header a:hover,
 .light-high-contrast header button:hover,
 .light-high-contrast nav a:hover {
