@@ -219,16 +219,33 @@ export const TARGET_NODE_SKU_CATALOGUE: PlatformNodeSkuSpec[] = [
 
   // Nutanix NC2 on Azure
   {
-    sku: 'AN36P',
+    sku: 'AN36',
     platform: 'nc2-azure',
-    displayName: 'AN36P (Intel Xeon BareMetal, 36 Cores, 768GB RAM)',
-    cpuArchitecture: 'Intel Xeon Cascade Lake',
+    displayName: 'AN36 (Intel Xeon BareMetal, 36 Cores, 768GB RAM, 19.2TB NVMe)',
+    cpuArchitecture: 'Intel Xeon Cascade Lake 6240',
     sockets: 2,
     physicalCores: 36,
     logicalThreads: 72,
     ramGB: 768,
     rawStorageTB: 19.2,
-    storageType: 'Azure BareMetal NVMe Storage Pool',
+    storageType: 'Azure BareMetal NVMe Storage Pool (DSF)',
+    minNodesCluster: 3,
+    maxNodesCluster: 28,
+    maxNodesPrivateCloud: 56,
+    supportedGenerations: ['NC2 Current'],
+    citation: OFFICIAL_CITATIONS.nutanixNc2
+  },
+  {
+    sku: 'AN36P',
+    platform: 'nc2-azure',
+    displayName: 'AN36P (Intel Xeon BareMetal High-Memory, 36 Cores, 1536GB RAM, 38.4TB NVMe)',
+    cpuArchitecture: 'Intel Xeon Cascade Lake 6240 (High-Memory)',
+    sockets: 2,
+    physicalCores: 36,
+    logicalThreads: 72,
+    ramGB: 1536,
+    rawStorageTB: 38.4,
+    storageType: 'Azure BareMetal NVMe Storage Pool (DSF High-Capacity)',
     minNodesCluster: 3,
     maxNodesCluster: 28,
     maxNodesPrivateCloud: 56,
@@ -251,6 +268,16 @@ export const STORAGE_ATTACHMENT_CATALOGUE: StorageAttachmentSpec[] = [
     supportedTargetPlatforms: ['avs-gen1', 'avs-gen2', 'vmc-aws', 'gcve', 'nc2-azure', 'on-prem'],
     description: 'Directly attached all-flash NVMe drives participating in hyperconverged vSAN / Nutanix DSF pool.',
     citation: OFFICIAL_CITATIONS.avsGen1
+  },
+  {
+    id: 'nutanix-dsf',
+    name: 'Nutanix Distributed Storage Fabric (DSF Pool RF2/RF3)',
+    provider: 'nutanix',
+    storageProtocol: 'NVMe-oF',
+    attachmentType: 'native-datastore',
+    supportedTargetPlatforms: ['nc2-azure'],
+    description: 'Nutanix AOS Distributed Storage Fabric spanning physical Azure BareMetal local NVMe drives with RF2 (2 copies) or RF3 (3 copies) and EC-X.',
+    citation: OFFICIAL_CITATIONS.nutanixNc2
   },
   {
     id: 'azure-anf',
@@ -291,6 +318,16 @@ export const STORAGE_ATTACHMENT_CATALOGUE: StorageAttachmentSpec[] = [
     supportedTargetPlatforms: ['gcve'],
     description: 'Fully managed NetApp service in Google Cloud attached as an external NFS datastore to GCVE clusters.',
     citation: OFFICIAL_CITATIONS.gcve
+  },
+  {
+    id: 'azure-blob-nc2',
+    name: 'Azure Blob Storage Tier (NC2 Snapshot Archive)',
+    provider: 'azure',
+    storageProtocol: 'Block',
+    attachmentType: 'backup-target',
+    supportedTargetPlatforms: ['nc2-azure'],
+    description: 'Native Azure Cool/Cold Blob storage account integrated with Prism Central / Nutanix Leap for automated snapshot tiering and disaster recovery backups.',
+    citation: OFFICIAL_CITATIONS.nutanixNc2
   }
 ];
 
@@ -341,6 +378,17 @@ export const DR_ENGINE_CATALOGUE: DrEngineCompatibilitySpec[] = [
     supportedSources: ['nutanix'],
     supportedTargets: ['nc2-azure'],
     notes: 'Native Nutanix AOS storage replication between on-premises AHV clusters and NC2 on Azure.',
+    citation: OFFICIAL_CITATIONS.nutanixNc2
+  },
+  {
+    id: 'nutanix-leap',
+    name: 'Nutanix Disaster Recovery / Nutanix Leap Orchestrator',
+    engineType: 'storage-array-mirror',
+    isContinuousDr: true,
+    minSupportedRpoMinutes: 1, // NearSync 1-minute RPO
+    supportedSources: ['nutanix', 'vmware'],
+    supportedTargets: ['nc2-azure'],
+    notes: 'Policy-based orchestration engine in Prism Central managing recovery plans, network mapping, script execution, and isolated test sandboxes.',
     citation: OFFICIAL_CITATIONS.nutanixNc2
   },
   {

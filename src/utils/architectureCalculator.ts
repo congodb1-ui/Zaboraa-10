@@ -19,11 +19,11 @@ export interface ClusterNodeClass {
 export interface EngineeringAssumptions {
   /** Target maximum vCPU to physical core ratio (e.g. 2.5 for general, 1.5 for mission-critical DB) */
   maxOversubscriptionRatio: number;
-  /** Percentage of RAM reserved for hypervisor, agents, and CVM (e.g. 0.08 for 8%) */
+  /** Percentage of RAM reserved for hypervisor, agents, and system daemons (e.g. 0.08 for 8%) */
   hypervisorRamOverheadPct: number;
   /** Percentage of CPU capacity reserved for hypervisor/ESXi/system daemons (e.g. 0.10 for 10%) */
   hypervisorCpuReservationPct: number;
-  /** Storage protection factor: RAID-1 / Mirror = 2.0, RAID-5 / EC = 1.33, RAID-6 / EC = 1.50 */
+  /** Storage protection factor: RAID-1 / Nutanix RF2 = 2.0, RAID-5 = 1.33, RAID-6 / Nutanix RF3 = 1.50 to 3.0 */
   storageProtectionFactor: number;
   /** Slack space reserved to prevent storage lockup during rebuilds/snapshots (e.g. 0.20 for 20%) */
   storageSlackSpacePct: number;
@@ -33,6 +33,12 @@ export interface EngineeringAssumptions {
   ariaOperationsIncluded?: boolean;
   /** Whether VMware Aria Automation orchestration & catalog pods are included in host capacity reservation */
   ariaAutomationIncluded?: boolean;
+  /** Whether cluster runs Nutanix AHV / AOS (accounting for dedicated Controller VM reservations) */
+  isNutanixPlatform?: boolean;
+  /** Dedicated vCPUs reserved per node for Nutanix Controller VM (CVM, typically 12 vCPUs) */
+  nutanixCvmVcpuPerHost?: number;
+  /** Dedicated RAM (GB) reserved per node for Nutanix Controller VM (CVM, typically 32-64 GB) */
+  nutanixCvmRamPerHostGB?: number;
 }
 
 export const DEFAULT_ENGINEERING_ASSUMPTIONS: EngineeringAssumptions = {
@@ -43,8 +49,25 @@ export const DEFAULT_ENGINEERING_ASSUMPTIONS: EngineeringAssumptions = {
   storageSlackSpacePct: 0.20,
   storageEfficiencyRatio: 1.0, // Unassumed baseline
   ariaOperationsIncluded: true,
-  ariaAutomationIncluded: true
+  ariaAutomationIncluded: true,
+  isNutanixPlatform: false,
+  nutanixCvmVcpuPerHost: 12,
+  nutanixCvmRamPerHostGB: 32
 };
+
+export interface PlatformConstraintValidation {
+  isCompliant: boolean;
+  warnings: string[];
+  errors: string[];
+}
+
+export interface DrSlaValidationResult {
+  isSupported: boolean;
+  warnings: string[];
+  requiresSynchronousLink: boolean;
+  latencyConstraintMs?: number;
+  minimumSafeBandwidthMbps: number;
+}
 
 export interface ClusterCapacityResult {
   clusterId: string;
@@ -57,6 +80,8 @@ export interface ClusterCapacityResult {
   rawStorageTB: number;
   usableStorageTB: number;
   maxRecommendedWorkloadVcpu: number;
+  cvmOverheadVcpus?: number;
+  cvmOverheadRamGB?: number;
 }
 
 export interface TotalCapacityResult {
@@ -125,10 +150,38 @@ export function calculateClusterCapacity(
   const logicalProcessors = cluster.hyperthreading ? physicalCores * 2 : physicalCores;
   const totalRamGB = cluster.hostCount * cluster.ramPerHostGB;
 
-  // Hypervisor and Aria management overhead calculation
-  const ariaRamAdd = (assumptions.ariaOperationsIncluded ? 0.03 : 0) + (assumptions.ariaAutomationIncluded ? 0.03 : 0);
-  const effectiveRamOverhead = Math.min(0.40, assumptions.hypervisorRamOverheadPct + ariaRamAdd);
-  const usableRamGB = Math.max(0, totalRamGB * (1 - effectiveRamOverhead));
+  // Overhead calculation based on platform architecture
+  let cvmOverheadVcpus = 0;
+  let cvmOverheadRamGB = 0;
+  let usableRamGB = 0;
+  let maxRecommendedWorkloadVcpu = 0;
+
+  if (assumptions.isNutanixPlatform) {
+    // Dedicated Nutanix Controller VM (CVM) reservation per bare-metal node
+    const cvmRamPerHost = assumptions.nutanixCvmRamPerHostGB ?? 32;
+    const cvmVcpuPerHost = assumptions.nutanixCvmVcpuPerHost ?? 12;
+    cvmOverheadRamGB = cluster.hostCount * cvmRamPerHost;
+    cvmOverheadVcpus = cluster.hostCount * cvmVcpuPerHost;
+
+    // Remaining RAM available for customer guest workloads
+    const ramAfterCvm = Math.max(0, totalRamGB - cvmOverheadRamGB);
+    usableRamGB = Math.max(0, ramAfterCvm * (1 - assumptions.hypervisorRamOverheadPct));
+
+    // Remaining compute available for customer guest workloads
+    const effectivePhysicalCores = physicalCores * (1 - assumptions.hypervisorCpuReservationPct);
+    const rawWorkloadVcpu = Math.floor(effectivePhysicalCores * assumptions.maxOversubscriptionRatio);
+    maxRecommendedWorkloadVcpu = Math.max(0, rawWorkloadVcpu - cvmOverheadVcpus);
+  } else {
+    // Standard VMware vSphere hypervisor & Aria management stack calculation
+    const ariaRamAdd = (assumptions.ariaOperationsIncluded ? 0.03 : 0) + (assumptions.ariaAutomationIncluded ? 0.03 : 0);
+    const effectiveRamOverhead = Math.min(0.40, assumptions.hypervisorRamOverheadPct + ariaRamAdd);
+    usableRamGB = Math.max(0, totalRamGB * (1 - effectiveRamOverhead));
+
+    const ariaCpuAdd = (assumptions.ariaOperationsIncluded ? 0.02 : 0) + (assumptions.ariaAutomationIncluded ? 0.02 : 0);
+    const effectiveCpuReservation = Math.min(0.40, assumptions.hypervisorCpuReservationPct + ariaCpuAdd);
+    const effectivePhysicalCores = physicalCores * (1 - effectiveCpuReservation);
+    maxRecommendedWorkloadVcpu = Math.floor(effectivePhysicalCores * assumptions.maxOversubscriptionRatio);
+  }
 
   const rawStorageTB = cluster.hostCount * cluster.rawStoragePerHostTB;
 
@@ -137,14 +190,6 @@ export function calculateClusterCapacity(
     0,
     (rawStorageTB * (1 - assumptions.storageSlackSpacePct) * assumptions.storageEfficiencyRatio) /
       assumptions.storageProtectionFactor
-  );
-
-  // Maximum recommended vCPU workload based on surviving physical cores and oversubscription
-  const ariaCpuAdd = (assumptions.ariaOperationsIncluded ? 0.02 : 0) + (assumptions.ariaAutomationIncluded ? 0.02 : 0);
-  const effectiveCpuReservation = Math.min(0.40, assumptions.hypervisorCpuReservationPct + ariaCpuAdd);
-  const effectivePhysicalCores = physicalCores * (1 - effectiveCpuReservation);
-  const maxRecommendedWorkloadVcpu = Math.floor(
-    effectivePhysicalCores * assumptions.maxOversubscriptionRatio
   );
 
   return {
@@ -157,7 +202,9 @@ export function calculateClusterCapacity(
     usableRamGB: Number(usableRamGB.toFixed(1)),
     rawStorageTB,
     usableStorageTB: Number(usableStorageTB.toFixed(1)),
-    maxRecommendedWorkloadVcpu
+    maxRecommendedWorkloadVcpu,
+    cvmOverheadVcpus: assumptions.isNutanixPlatform ? cvmOverheadVcpus : undefined,
+    cvmOverheadRamGB: assumptions.isNutanixPlatform ? cvmOverheadRamGB : undefined
   };
 }
 
@@ -313,4 +360,137 @@ export function convertStorageUnits(
   } else {
     return Number(((value * BYTES_PER_TIB) / BYTES_PER_TB).toFixed(2));
   }
+}
+
+/**
+ * Validates hardware platform constraints, minimum/maximum nodes, and operational margins.
+ */
+export function validateClusterConstraints(params: {
+  platform: 'avs-gen1' | 'avs-gen2' | 'vmc-aws' | 'gcve' | 'nc2-azure' | string;
+  nodeCount: number;
+  replicationFactor?: 'RF2' | 'RF3';
+  storageSlackPct?: number;
+  oversubscriptionRatio?: number;
+}): PlatformConstraintValidation {
+  const warnings: string[] = [];
+  const errors: string[] = [];
+
+  // Minimum and Maximum node limits per platform verified against vendor documentation
+  if (params.platform === 'avs-gen1' || params.platform === 'avs-gen2') {
+    if (params.nodeCount < 3) {
+      errors.push('Azure VMware Solution (AVS) requires a minimum of 3 nodes per cluster for Microsoft production SLA.');
+    }
+    if (params.nodeCount > 16) {
+      warnings.push('AVS standard cluster limit is 16 nodes per cluster (up to 96 nodes across multiple clusters in private cloud).');
+    }
+  } else if (params.platform === 'vmc-aws') {
+    if (params.nodeCount < 2) {
+      errors.push('VMware Cloud on AWS requires minimum 2 nodes for production cluster SLA with i4i.metal.');
+    }
+    if (params.nodeCount > 16) {
+      warnings.push('VMC on AWS cluster limit is 16 hosts per cluster.');
+    }
+  } else if (params.platform === 'gcve') {
+    if (params.nodeCount < 3) {
+      errors.push('Google Cloud VMware Engine requires minimum 3 nodes per cluster for standard production SLA.');
+    }
+    if (params.nodeCount > 32) {
+      warnings.push('GCVE cluster limit is 32 nodes per cluster.');
+    }
+  } else if (params.platform === 'nc2-azure') {
+    const isRf3 = params.replicationFactor === 'RF3';
+    const minNodes = isRf3 ? 5 : 3;
+    if (params.nodeCount < minNodes) {
+      errors.push(
+        `Nutanix NC2 on Azure with ${isRf3 ? 'RF3 (3-copy mirror)' : 'RF2 (2-copy mirror)'} requires minimum ${minNodes} physical bare-metal nodes.`
+      );
+    }
+    if (params.nodeCount > 28) {
+      warnings.push('Nutanix NC2 on Azure supports up to 28 bare-metal nodes per cluster in a single Azure availability zone.');
+    }
+  }
+
+  // Sizing & operational headroom checks
+  if (params.storageSlackPct !== undefined && params.storageSlackPct < 0.20) {
+    warnings.push('Storage slack space is below the recommended 20-25% threshold. vSAN / DSF rebuilds and snapshot storms risk cluster storage lockup.');
+  }
+  if (params.oversubscriptionRatio !== undefined && params.oversubscriptionRatio > 3.0) {
+    warnings.push('vCPU:pCore oversubscription exceeds 3:1. High CPU contention may cause latency spikes on mission-critical database workloads.');
+  }
+
+  return {
+    isCompliant: errors.length === 0,
+    warnings,
+    errors
+  };
+}
+
+/**
+ * Validates user-requested RTO and RPO against certified platform capabilities and network limits.
+ * Distinguishes user-entered targets from vendor-supported architectural realities.
+ */
+export function validateDisasterRecoverySla(params: {
+  platform: string;
+  engine: string;
+  requestedRpoMinutes: number;
+  requestedRtoMinutes: number;
+  dailyChurnGB: number;
+  availableWanMbps: number;
+  estimatedLatencyRttMs?: number;
+}): DrSlaValidationResult {
+  const warnings: string[] = [];
+  let isSupported = true;
+  let requiresSynchronousLink = false;
+  let latencyConstraintMs: number | undefined = undefined;
+
+  // 1. Synchronous RPO (0 minutes)
+  if (params.requestedRpoMinutes === 0) {
+    requiresSynchronousLink = true;
+    latencyConstraintMs = 5;
+    const isSyncEngine = params.engine.includes('Metro') || params.engine.includes('Stretched');
+    if (!isSyncEngine) {
+      isSupported = false;
+      warnings.push(
+        `Engine "${params.engine}" does not support 0-minute synchronous RPO. Synchronous zero-loss replication requires Nutanix Metro Availability or VMware Stretched Cluster.`
+      );
+    }
+    if (params.estimatedLatencyRttMs && params.estimatedLatencyRttMs > 5) {
+      warnings.push(
+        `Estimated round-trip latency (${params.estimatedLatencyRttMs} ms) exceeds the 5 ms RTT threshold required for synchronous zero-RPO storage commits. System will degrade to asynchronous replication.`
+      );
+    }
+  }
+
+  // 2. Sub-5-minute RPO checks
+  if (params.requestedRpoMinutes > 0 && params.requestedRpoMinutes < 5) {
+    if (params.engine.includes('SRM') || params.engine.includes('vSphere Replication')) {
+      warnings.push(
+        'VMware vSphere Replication natively supports a minimum RPO of 5 minutes. Sub-5-minute RPO requires Continuous Data Protection (Zerto) or Storage Array-based replication (SRA).'
+      );
+    }
+  }
+
+  // 3. Backup snapshot engines (e.g. Veeam)
+  if (params.engine.includes('Veeam') && params.requestedRpoMinutes < 15) {
+    warnings.push(
+      'Snapshot-based backup replication (Veeam) typically operates at 15-60+ minute RPO due to VM snapshot creation, storage quiescing, and snapshot consolidation overhead.'
+    );
+  }
+
+  // 4. Bandwidth calculation vs available WAN
+  const effectiveIntervalMin = Math.max(1, params.requestedRpoMinutes);
+  const minimumSafeBandwidthMbps = calculateReplicationBandwidthMbps(params.dailyChurnGB, effectiveIntervalMin * 6, 1.25);
+  if (params.availableWanMbps > 0 && minimumSafeBandwidthMbps > params.availableWanMbps) {
+    warnings.push(
+      `Required continuous replication bandwidth (~${minimumSafeBandwidthMbps.toFixed(0)} Mbps) exceeds available WAN link (${params.availableWanMbps} Mbps). RPO SLA cannot be guaranteed under continuous write load.`
+    );
+  }
+
+  return {
+    isSupported,
+    warnings,
+    requiresSynchronousLink,
+    latencyConstraintMs,
+    minimumSafeBandwidthMbps
+  };
 }

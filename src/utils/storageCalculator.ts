@@ -4,14 +4,21 @@
  * ZERO COSTING: Exclusively technical capacity, parity, and node density calculations.
  */
 
-export type StoragePolicyId = 'raid1_ftt1' | 'raid5_ftt1' | 'raid6_ftt2';
+export type StoragePolicyId =
+  | 'raid1_ftt1'
+  | 'raid5_ftt1'
+  | 'raid6_ftt2'
+  | 'nutanix_rf2'
+  | 'nutanix_rf3'
+  | 'nutanix_rf2_ecx'
+  | 'nutanix_rf3_ecx';
 
 export interface StoragePolicyDefinition {
   id: StoragePolicyId;
   name: string;
   shortLabel: string;
   overheadMultiplier: number;
-  parityEfficiencyPercent: number; // e.g. 50% for RAID 1, 75% for RAID 5, 66.7% for RAID 6
+  parityEfficiencyPercent: number; // e.g. 50% for RAID 1 / RF2, 75% for RAID 5, 66.7% for RAID 6, 80% for RF2+EC-X
   minHosts: number;
   faultTolerance: string;
   description: string;
@@ -51,6 +58,50 @@ export const ENTERPRISE_STORAGE_POLICIES: Record<StoragePolicyId, StoragePolicyD
     faultTolerance: '2 Simultaneous Host Failures',
     description: '4+2 dual parity erasure coding stripe across 6+ nodes. Maximum resilience for tier-0 production.',
     technicalTradeoff: 'Tolerates 2 concurrent host crashes; requires minimum 6 hosts in the target cluster.'
+  },
+  nutanix_rf2: {
+    id: 'nutanix_rf2',
+    name: 'Nutanix DSF Replication Factor 2 (RF2)',
+    shortLabel: 'Nutanix RF2 (2x Overhead)',
+    overheadMultiplier: 2.0,
+    parityEfficiencyPercent: 50,
+    minHosts: 3,
+    faultTolerance: '1 Node or Disk Failure',
+    description: 'Nutanix Distributed Storage Fabric 2-copy replication across Azure bare-metal nodes.',
+    technicalTradeoff: 'High write throughput; requires minimum 3 physical nodes.'
+  },
+  nutanix_rf3: {
+    id: 'nutanix_rf3',
+    name: 'Nutanix DSF Replication Factor 3 (RF3)',
+    shortLabel: 'Nutanix RF3 (3x Overhead)',
+    overheadMultiplier: 3.0,
+    parityEfficiencyPercent: 33.3,
+    minHosts: 5,
+    faultTolerance: '2 Simultaneous Node Failures',
+    description: 'Nutanix DSF 3-copy replication across Azure bare-metal nodes for mission-critical resiliency.',
+    technicalTradeoff: 'Maximum failure resilience; requires minimum 5 physical nodes and 300 GB raw per 100 GB usable.'
+  },
+  nutanix_rf2_ecx: {
+    id: 'nutanix_rf2_ecx',
+    name: 'Nutanix DSF RF2 with EC-X Erasure Coding',
+    shortLabel: 'Nutanix RF2 + EC-X (~1.25x Overhead)',
+    overheadMultiplier: 1.25,
+    parityEfficiencyPercent: 80,
+    minHosts: 4,
+    faultTolerance: '1 Node or Disk Failure',
+    description: 'Inline RF2 with background EC-X stripe (4+1) for cold/write-cold data blocks.',
+    technicalTradeoff: 'Delivers up to 80% storage efficiency; requires minimum 4 nodes in cluster.'
+  },
+  nutanix_rf3_ecx: {
+    id: 'nutanix_rf3_ecx',
+    name: 'Nutanix DSF RF3 with EC-X Erasure Coding',
+    shortLabel: 'Nutanix RF3 + EC-X (~1.50x Overhead)',
+    overheadMultiplier: 1.5,
+    parityEfficiencyPercent: 66.7,
+    minHosts: 6,
+    faultTolerance: '2 Simultaneous Node Failures',
+    description: 'Inline RF3 with background dual-parity EC-X stripe (4+2) for mission-critical cold data blocks.',
+    technicalTradeoff: 'Tolerates 2 concurrent host crashes while saving 50% capacity over raw RF3; requires 6 nodes.'
   }
 };
 
