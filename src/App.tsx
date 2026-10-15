@@ -38,10 +38,8 @@ import {
   LogOut,
   Eye,
   EyeOff,
-  FolderGit2,
   Sparkles
 } from 'lucide-react';
-import { GOOGLE_DRIVE_CONFIG } from './data/mediaAssets';
 
 // Scroll to top automatically on route changes
 const ScrollToTop: React.FC = () => {
@@ -194,17 +192,6 @@ const MainLayout: React.FC = () => {
         >
           {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-cyan-400" />}
         </button>
-
-        {/* Google Drive Quick Link */}
-        <a
-          href={GOOGLE_DRIVE_CONFIG.folderUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-slate-900/90 hover:bg-slate-800 border border-cyan-500/40 text-cyan-300 shadow-2xl backdrop-blur-md transition-all hover:scale-105 cursor-pointer"
-          title="Open Google Drive Cloud Workspace"
-        >
-          <FolderGit2 className="w-4 h-4 text-cyan-400" />
-        </a>
 
         {/* Admin-Only Floating Customizer Control */}
         {isAdmin && (

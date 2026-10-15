@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Cpu, FileSpreadsheet, ShieldAlert, CpuIcon, Layers, HardDrive, ArrowRight, CheckCircle2, ExternalLink, FolderGit2, Sparkles, Download, Network } from 'lucide-react';
+import { Cpu, FileSpreadsheet, ShieldAlert, CpuIcon, Layers, HardDrive, ArrowRight, CheckCircle2, Sparkles, Download, Network, FolderGit2 } from 'lucide-react';
 import { GOOGLE_DRIVE_CONFIG } from '../../data/mediaAssets';
 
 export const WorkbenchHubPage: React.FC = () => {
@@ -94,11 +94,11 @@ export const WorkbenchHubPage: React.FC = () => {
       subtitle: 'Dynamic BOM Deliverable & Architecture Exporter',
       badge: 'Architecture Engine',
       accentColor: 'border-indigo-500/40 text-indigo-400 bg-indigo-950/20',
-      description: 'Synthesize sizing inputs or imported RVTools assessments into a verified bill of materials (BOM), visual multi-tier topology cards, and advisory briefing dossiers. Directly connected to your dedicated Google Drive workspace.',
+      description: 'Synthesize sizing inputs or imported RVTools assessments into a verified bill of materials (BOM), visual multi-tier topology cards, and advisory briefing dossiers with presentation-ready deliverables and Google Drive workspace synchronization.',
       capabilities: [
         'Dual inputs: Automated RVTools inventory or manual parameter forms',
         'Generates hardware BOM, networking interconnects, and license mapping',
-        'One-click PDF/JSON export linking to Google Drive and advisory briefing',
+        'One-click PDF/JSON architecture dossier export with Google Drive cloud repository sync',
         'Enterprise architecture standards tailored to AVS, GCVE, and VMC'
       ]
     }
@@ -118,39 +118,6 @@ export const WorkbenchHubPage: React.FC = () => {
         <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
           Production-calibrated tools designed for enterprise cloud architects. Size bare-metal clusters, assess migration readiness from real RVTools spreadsheets, compute DR bandwidth windows, and generate validated architectural blueprints.
         </p>
-      </div>
-
-      {/* Google Drive Workspace Banner */}
-      <div className="p-6 rounded-xl bg-slate-900/80 border border-cyan-500/30 shadow-lg backdrop-blur-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-lg bg-cyan-950/80 border border-cyan-500/40 text-cyan-400 shrink-0">
-            <FolderGit2 className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-white">Dedicated Google Drive Cloud Storage</h2>
-              <span className="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded">
-                Connected
-              </span>
-            </div>
-            <p className="text-sm text-slate-400 mt-1 max-w-2xl">
-              All architectural blueprints, exported migration reports, and media deliverables are synchronized with your dedicated Google Drive workspace.
-            </p>
-            <div className="text-xs font-mono text-slate-500 mt-2 flex items-center gap-2">
-              <span>Folder ID:</span>
-              <span className="text-cyan-300 select-all">{GOOGLE_DRIVE_CONFIG.folderId}</span>
-            </div>
-          </div>
-        </div>
-        <a
-          href={GOOGLE_DRIVE_CONFIG.folderUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-cyan-300 text-xs font-semibold transition-all hover:scale-[1.02] shrink-0"
-        >
-          <span>Open Cloud Drive Folder</span>
-          <ExternalLink className="w-4 h-4" />
-        </a>
       </div>
 
       {/* 4 Core Tools Grid */}
@@ -211,6 +178,41 @@ export const WorkbenchHubPage: React.FC = () => {
             </div>
           );
         })}
+      </div>
+
+      {/* Cloud Drive Architecture Workspace Banner */}
+      <div className="relative rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 p-6 sm:p-8 shadow-xl overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-3xl">
+            <div className="flex items-center gap-2">
+              <FolderGit2 className="w-5 h-5 text-indigo-400" />
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-400">
+                Cloud Architecture Workspace & Repository Bridge
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-[10px] font-mono text-indigo-300">
+                Connected
+              </span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              Google Drive Cloud Storage & Architecture Workspace
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Centralized workspace repository for client RVTools assessments, sized bare-metal BOM configurations, and generated 3D isometric blueprints. Synchronized with executive dossiers and verified deployment specifications.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-mono text-slate-400">
+              <div className="flex items-center gap-1.5 text-slate-300">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span>Active Workspace ID: <span className="text-indigo-300">{GOOGLE_DRIVE_CONFIG.folderId}</span></span>
+              </div>
+              <span className="text-slate-600">|</span>
+              <div className="flex items-center gap-1.5 text-slate-300">
+                <Sparkles className="w-4 h-4 text-cyan-400" />
+                <span>Continuous Assessment & Blueprint Sync</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -9,10 +9,9 @@ import {
   MapPin,
   CheckCircle2,
   Sliders,
-  ExternalLink,
-  FolderGit2
+  ExternalLink
 } from 'lucide-react';
-import { resolveMediaUrl, GOOGLE_DRIVE_CONFIG } from '../data/mediaAssets';
+import { resolveMediaUrl } from '../data/mediaAssets';
 
 export const AboutPage: React.FC = () => {
   const { siteConfig, setIsBriefingModalOpen, isAdmin, setIsPhotoEditorOpen } = useCustomization();
@@ -36,40 +35,80 @@ export const AboutPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
         {/* Left Column: Portrait & Credentials (5 Cols) */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl group">
-            <img
-              src={resolvedPortrait}
-              alt={founder.name}
-              referrerPolicy="no-referrer"
-              className="w-full h-auto object-cover max-h-[500px]"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = '/assets/images/wasim_sayyed_executive_1791473154875.jpg';
-              }}
-            />
-            {isAdmin && (
-              <button
-                onClick={() => setIsPhotoEditorOpen(true)}
-                className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-emerald-500/50 text-emerald-300 text-xs font-mono flex items-center gap-1.5 backdrop-blur-md cursor-pointer"
-              >
-                <Sliders className="w-3.5 h-3.5" />
-                <span>[Edit Portrait]</span>
-              </button>
-            )}
-            <div className="p-6 bg-slate-950/90 border-t border-slate-800 space-y-3">
-              <div>
-                <h2 className="text-xl font-bold text-white">{founder.name}</h2>
-                <div className="text-xs font-mono text-cyan-300 mt-0.5">{founder.role}</div>
+          <div
+            data-theme-container="dark"
+            className="dark-card dark-feature-container relative rounded-2xl border border-slate-800 bg-slate-900/95 p-6 sm:p-8 shadow-2xl backdrop-blur-md overflow-hidden text-center flex flex-col items-center"
+          >
+            {/* Subtle pulsating cyber-glow backdrop aura */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-72 bg-gradient-to-tr from-cyan-500/30 via-emerald-500/25 to-blue-500/30 blur-2xl animate-cyber-glow pointer-events-none" />
+
+            {/* Circular Expanded Avatar with Dynamic Radial Cyber Border */}
+            <div
+              className={`relative group/avatar ${isAdmin ? 'cursor-pointer' : ''}`}
+              onClick={isAdmin ? () => setIsPhotoEditorOpen(true) : undefined}
+              title={isAdmin ? "Click to customize founder profile photo" : undefined}
+            >
+              <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-full p-[3.5px] animate-ring-breathe overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover/avatar:scale-[1.02]">
+                <div className="absolute inset-[-50%] cyber-radial-border animate-radial-spin" />
+                <div className="relative w-full h-full rounded-full overflow-hidden bg-slate-950 p-1">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 relative">
+                    <img
+                      src={resolvedPortrait}
+                      alt={founder.name}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover/avatar:scale-105"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/assets/images/wasim_sayyed_executive_1791473154875.jpg';
+                      }}
+                    />
+                    {/* Hover / Click Overlay to Change Photo - Only visible for Admin */}
+                    {isAdmin && (
+                      <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center gap-1.5 text-xs font-semibold text-cyan-300 transition-opacity backdrop-blur-[2px]">
+                        <Sliders className="w-6 h-6 text-cyan-400" />
+                        <span>Edit Portrait</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-slate-400 pt-1">
+              <div
+                className="absolute bottom-3 right-3 p-2 rounded-full bg-slate-900 border-2 border-cyan-400 text-cyan-400 shadow-xl shadow-cyan-500/30 z-20"
+                title="Verified Principal VMware Architect"
+              >
+                <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+              </div>
+            </div>
+
+            <div className="mt-5 space-y-1">
+              <h2 className="text-2xl font-bold text-white">{founder.name}</h2>
+              <div className="text-xs font-mono text-cyan-300">{founder.role}</div>
+            </div>
+
+            <div className="mt-3 flex flex-col items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5">
                 <MapPin className="w-4 h-4 text-cyan-400" />
                 <span>{founder.location}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5">
                 <Mail className="w-4 h-4 text-cyan-400" />
                 <span>{founder.email}</span>
               </div>
             </div>
+
+            {/* Quick Customize Button - Only visible for Admin */}
+            {isAdmin && (
+              <div className="pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsPhotoEditorOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-cyan-300 bg-cyan-950/70 hover:bg-cyan-900/90 border border-cyan-500/40 hover:border-cyan-400 transition-all shadow-sm cursor-pointer"
+                >
+                  <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Customize Portrait</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Certifications Box */}
@@ -141,30 +180,6 @@ export const AboutPage: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
-
-          {/* Google Drive Workspace Card */}
-          <div className="p-6 rounded-xl bg-slate-900 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="p-2.5 rounded-lg bg-cyan-950 text-cyan-400 border border-cyan-500/40 shrink-0">
-                <FolderGit2 className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white">Cloud Architecture Workspace</h4>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Access downloadable blueprints, client dossiers, and architecture templates stored in our shared Google Drive repository.
-                </p>
-              </div>
-            </div>
-            <a
-              href={GOOGLE_DRIVE_CONFIG.folderUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-cyan-300 text-xs font-semibold shrink-0"
-            >
-              <span>Drive Repository</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
           </div>
 
           {/* Book Briefing CTA */}

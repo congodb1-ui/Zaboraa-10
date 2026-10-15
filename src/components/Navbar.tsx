@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useCustomization } from '../context/CustomizationContext';
-import { supabase } from '../supabaseClient';
 
 import {
   Search,
@@ -23,11 +22,9 @@ import {
   Film,
   FileText,
   ExternalLink,
-  FolderGit2,
   Network,
   Sparkles
 } from 'lucide-react';
-import { GOOGLE_DRIVE_CONFIG } from '../data/mediaAssets';
 import { ZaboraaLogoMark } from './ZaboraaLogo';
 import { useAuth } from '../context/AuthContext';
 
@@ -47,20 +44,6 @@ export const Navbar: React.FC = () => {
   const { user: authUser, subscriptionTier: licenseTier, setIsCommercializeModalOpen } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<'disciplines' | 'tools' | 'resources' | null>(null);
-
-// Vertex AI Live Connection Status State via Supabase / Auth Session
-  const [vertexStatus, setVertexStatus] = useState<'checking' | 'connected' | 'disconnected'>('connected');
-
-  useEffect(() => {
-    // Check if Supabase client is configured and responding
-    if (supabase && supabase.auth) {
-      supabase.auth.getSession()
-        .then(() => setVertexStatus('connected'))
-        .catch(() => setVertexStatus('disconnected'));
-    } else {
-      setVertexStatus('disconnected');
-    }
-  }, []);
 
   // Close dropdowns on outside click or navigation
   const navRef = useRef<HTMLDivElement>(null);
@@ -94,31 +77,31 @@ export const Navbar: React.FC = () => {
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
       <div
         ref={navRef}
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4 sm:gap-6 relative"
+        className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2.5 sm:gap-4 lg:gap-6 relative"
       >
         {/* Subtle ambient brand glow in navbar */}
         <div className="absolute left-4 top-1/2 -translate-y-1/2 w-48 h-8 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
 
         {/* Zone 1: Brand Wordmark & Architectural Emblem */}
-        <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0 relative z-10">
-          <ZaboraaLogoMark sizeClass="w-9 h-9 sm:w-10 sm:h-10" />
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 relative z-10">
+          <ZaboraaLogoMark sizeClass="w-8 h-8 sm:w-10 sm:h-10" />
           <span className="flex flex-col tracking-tight select-none">
             <span className="flex items-center gap-1.5 leading-none">
-              <span className="text-base sm:text-lg font-black tracking-tight text-white font-sans group-hover:text-cyan-300 transition-colors">
+              <span className="text-sm sm:text-base lg:text-lg font-black tracking-tight text-white font-sans group-hover:text-cyan-300 transition-colors">
                 ZABORAA
               </span>
-              <span className="text-[10px] font-mono font-bold tracking-wider px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 uppercase shadow-sm group-hover:border-cyan-400 group-hover:bg-cyan-900/60 transition-all">
+              <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-wider px-1 sm:px-1.5 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 uppercase shadow-sm group-hover:border-cyan-400 group-hover:bg-cyan-900/60 transition-all">
                 TECHNOLOGIES
               </span>
             </span>
-            <span className="text-[9px] font-mono tracking-widest text-slate-400 uppercase font-semibold mt-1 group-hover:text-cyan-300/80 transition-colors hidden sm:block">
+            <span className="text-[9px] font-mono tracking-widest text-slate-400 uppercase font-semibold mt-1 group-hover:text-cyan-300/80 transition-colors hidden xl:block">
               Multi-Cloud VMware Architecture
             </span>
           </span>
         </Link>
 
         {/* Zone 2: Navigation Links & Accessible Dropdowns */}
-        <nav className="hidden lg:flex items-center gap-2 xl:gap-3 text-xs font-semibold text-slate-300">
+        <nav className="hidden xl:flex items-center gap-1.5 xl:gap-2.5 text-xs font-semibold text-slate-300">
           {/* Disciplines Dropdown */}
           <div className="relative">
             <button
@@ -272,7 +255,7 @@ export const Navbar: React.FC = () => {
                       Automated Hybrid Blueprint Generator
                     </div>
                     <div className="text-[10px] text-slate-400">
-                      Dynamic BOM deliverable & Google Drive export
+                      Dynamic BOM deliverable & 4K UHD export
                     </div>
                   </div>
                 </Link>
@@ -370,43 +353,11 @@ export const Navbar: React.FC = () => {
         </nav>
 
         {/* Zone 3: Primary Actions & Admin & Theme */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Vertex AI Live Status Indicator Badge */}
-          <div className="hidden xl:flex items-center">
-            {vertexStatus === 'connected' ? (
-              <span className="bg-emerald-950/80 text-emerald-300 border border-emerald-800 px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                Vertex AI Active
-              </span>
-            ) : vertexStatus === 'checking' ? (
-              <span className="bg-slate-900 text-slate-400 border border-slate-800 px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                Checking Vertex...
-              </span>
-            ) : (
-              <span className="bg-red-950/80 text-red-300 border border-red-800 px-2.5 py-1 rounded-full text-[11px] font-medium flex items-center gap-1.5 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-red-500"></span>
-                Vertex AI Disconnected
-              </span>
-            )}
-          </div>
-
-          {/* Google Drive Link */}
-          <a
-            href={GOOGLE_DRIVE_CONFIG.folderUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:text-cyan-300 bg-slate-900/80 hover:bg-slate-800 border border-slate-800 rounded-md transition-colors"
-            title="Open Dedicated Google Drive Storage Folder"
-          >
-            <FolderGit2 className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="text-[11px] font-mono">Cloud Drive</span>
-          </a>
-
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Global Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md transition-colors cursor-pointer"
+            className="flex items-center justify-center p-1.5 sm:px-2 sm:py-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md transition-colors cursor-pointer shrink-0"
             title={theme === 'dark' ? 'Switch to High-Contrast Light Mode' : 'Switch to Dark Mode'}
             aria-label="Toggle theme mode"
           >
@@ -420,11 +371,11 @@ export const Navbar: React.FC = () => {
           {/* Search Button (Ctrl+K) */}
           <button
             onClick={() => setIsSearchOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md transition-colors cursor-pointer"
+            className="flex items-center gap-1 p-1.5 sm:px-2 sm:py-1.5 text-xs font-medium text-slate-400 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-md transition-colors cursor-pointer shrink-0"
             title="Search across all platforms, tools, and runbooks (Ctrl+K)"
           >
             <Search className="w-3.5 h-3.5 text-slate-400" />
-            <kbd className="hidden sm:inline px-1 py-0.2 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono text-slate-400">
+            <kbd className="hidden xl:inline px-1 py-0.2 bg-slate-800 border border-slate-700 rounded text-[10px] font-mono text-slate-400">
               ⌘K
             </kbd>
           </button>
@@ -433,7 +384,7 @@ export const Navbar: React.FC = () => {
           {isAdmin ? (
             <button
               onClick={() => setIsCustomizerOpen(true)}
-              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/60 rounded-md transition-colors cursor-pointer"
+              className="hidden sm:flex items-center gap-1 px-2 sm:px-2.5 py-1.5 text-xs font-bold text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/60 rounded-md transition-colors cursor-pointer shrink-0"
               title="Open site customizer drawer"
             >
               <Sliders className="w-3.5 h-3.5 text-emerald-400" />
@@ -442,7 +393,7 @@ export const Navbar: React.FC = () => {
           ) : (
             <button
               onClick={() => setIsAdminLoginModalOpen(true)}
-              className="flex items-center justify-center p-1.5 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+              className="flex items-center justify-center p-1.5 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer shrink-0"
               title="Admin Mode login"
             >
               <Lock className="w-3.5 h-3.5" />
@@ -452,35 +403,38 @@ export const Navbar: React.FC = () => {
           {/* Commercialization & Google Account Trigger */}
           <button
             onClick={() => setIsCommercializeModalOpen(true)}
-            className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer shrink-0 ${
               authUser
                 ? 'bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 text-cyan-200'
                 : 'bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white'
             }`}
             title="Commercialize tools, pricing tiers, and Google Authentication"
           >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="truncate max-w-[120px]">{authUser ? authUser.displayName?.split(' ')[0] : 'Sign In / Pro'}</span>
-            <span className={`text-[9px] font-mono px-1 py-0.2 rounded uppercase font-bold ${
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <span className="hidden md:inline truncate max-w-[90px] lg:max-w-[110px]">
+              {authUser ? authUser.displayName?.split(' ')[0] : 'Sign In'}
+            </span>
+            <span className={`text-[9px] font-mono px-1 py-0.2 rounded uppercase font-bold shrink-0 ${
               licenseTier === 'pro' ? 'bg-cyan-500 text-slate-950' : 'bg-slate-800 text-slate-400'
             }`}>
               {licenseTier === 'pro' ? 'PRO' : 'FREE'}
             </span>
           </button>
 
-          {/* Primary CTA Button: Book Briefing */}
+          {/* Primary CTA Button: Book Briefing - Fully visible with guaranteed zero cut-off */}
           <button
             onClick={() => setIsBriefingModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-md transition-all shadow-sm hover:scale-105 cursor-pointer whitespace-nowrap"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-md transition-all shadow-sm hover:scale-105 cursor-pointer whitespace-nowrap shrink-0"
+            title="Schedule an Executive Architecture Briefing"
           >
-            <Calendar className="w-3.5 h-3.5" />
+            <Calendar className="w-3.5 h-3.5 shrink-0" />
             <span>Book Briefing</span>
           </button>
 
           {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 text-slate-400 hover:text-white rounded-md bg-slate-900 border border-slate-800 transition-colors cursor-pointer"
+            className="xl:hidden p-1.5 sm:p-2 text-slate-400 hover:text-white rounded-md bg-slate-900 border border-slate-800 transition-colors cursor-pointer shrink-0"
             aria-label="Toggle mobile menu"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -490,21 +444,7 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-b border-slate-800 bg-slate-950 px-4 pt-4 pb-6 space-y-4 max-h-[80vh] overflow-y-auto">
-          {/* Mobile Vertex Status Banner */}
-          <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-            <span className="text-slate-400">Vertex AI Status:</span>
-            {vertexStatus === 'connected' ? (
-              <span className="text-emerald-400 font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Active
-              </span>
-            ) : (
-              <span className="text-red-400 font-semibold flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-red-500"></span> Disconnected
-              </span>
-            )}
-          </div>
-
+        <div className="xl:hidden border-b border-slate-800 bg-slate-950 px-4 pt-4 pb-6 space-y-4 max-h-[80vh] overflow-y-auto">
           <div className="space-y-1">
             <NavLink
               to="/"

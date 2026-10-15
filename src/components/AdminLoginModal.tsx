@@ -52,7 +52,7 @@ export const AdminLoginModal: React.FC = () => {
         setPasscode('');
       }, 1000);
     } else {
-      setErrorMsg('Invalid passcode. (Hint: default passcode is "zaboraa2026")');
+      setErrorMsg('Invalid admin passcode. Please verify your credentials and try again.');
     }
   };
 
@@ -91,7 +91,8 @@ export const AdminLoginModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-150">
       <div 
-        className="relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700/80 shadow-2xl p-6 text-slate-100 space-y-5"
+        data-theme-container="dark"
+        className="dark-card dark-feature-container relative w-full max-w-md rounded-2xl bg-slate-900 border border-slate-700/80 shadow-2xl p-6 text-slate-100 space-y-5"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -105,7 +106,7 @@ export const AdminLoginModal: React.FC = () => {
                 {isAdmin ? 'Admin Control Center' : 'Architect Access Portal'}
               </h3>
               <p className="text-[11px] text-slate-400">
-                {isAdmin ? 'Admin Mode: Wasim Sayyed (Full Control)' : 'Client Protection: Read-Only by Default'}
+                {isAdmin ? 'Admin Mode: Wasim Sayyed (Full Control)' : 'Client Protection: Read-Only Mode'}
               </p>
             </div>
           </div>
@@ -206,7 +207,7 @@ export const AdminLoginModal: React.FC = () => {
                     setPasscode(e.target.value);
                     setErrorMsg('');
                   }}
-                  placeholder="Passcode (default: zaboraa2026)"
+                  placeholder="Enter architect admin passcode"
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 text-xs font-mono focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                 />
               </div>
@@ -226,8 +227,9 @@ export const AdminLoginModal: React.FC = () => {
               )}
 
               <div className="flex items-center justify-between pt-2">
-                <span className="text-[10px] font-mono text-slate-500">
-                  Default: <span className="text-cyan-400">zaboraa2026</span>
+                <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1.5">
+                  <Lock className="w-3 h-3 text-slate-500" />
+                  <span>Restricted Access</span>
                 </span>
 
                 <div className="flex items-center gap-2">

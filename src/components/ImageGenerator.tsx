@@ -104,7 +104,7 @@ export const ImageGenerator: React.FC = () => {
             <h2 className="text-lg font-bold tracking-tight text-white">
               Enterprise 4K Architecture & 3D Blueprint Engine
             </h2>
-            <p className="text-xs text-slate-400">Powered by Vertex AI & Supabase Tenant Sync</p>
+            <p className="text-xs text-slate-400">Enterprise AI Engine & Architecture Tenant Sync</p>
           </div>
         </div>
         {savedStatus && (

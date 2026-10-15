@@ -114,125 +114,127 @@ export const Hero: React.FC = () => {
 
           {/* Right Column: Founder Authority Card */}
           <div className="lg:col-span-5">
-            <div className="relative rounded-xl border border-slate-800 bg-slate-900/90 p-6 sm:p-7 shadow-2xl backdrop-blur-md">
+            <div
+              data-theme-container="dark"
+              className="relative rounded-2xl border border-slate-800 bg-slate-900/95 p-6 sm:p-8 shadow-2xl backdrop-blur-md dark-card dark-feature-container hero-dark-card overflow-hidden group/hero"
+            >
+              {/* Subtle pulsating cyber glow and ambient radial aura */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-72 bg-gradient-to-tr from-cyan-500/20 via-emerald-500/15 to-transparent rounded-full blur-3xl pointer-events-none animate-pulse" />
+
               {/* Subtle top indicator */}
-              <div className="flex items-center justify-between pb-5 border-b border-slate-800/80">
+              <div className="relative z-10 flex items-center justify-between pb-4 border-b border-slate-800/80">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-5 h-5 text-cyan-400" />
                   <span className="text-xs font-semibold text-slate-300">
                     Lead Principal Architect
                   </span>
                 </div>
-                <div className="text-xs text-slate-500 font-mono">
+                <div className="text-xs text-slate-400 font-mono">
                   ACTIVE AVAILABILITY
                 </div>
               </div>
 
-              {/* Founder Header */}
-              <div className="mt-5 flex items-start gap-4">
-                <div className="relative group/avatar shrink-0">
-                  <div
-                    className={`relative w-24 h-24 rounded-xl overflow-hidden transition-all duration-200 border-2 ${
-                      photoStyle.borderGlow === 'cyan'
-                        ? 'border-cyan-400/90 shadow-xl shadow-cyan-500/25 ring-2 ring-cyan-500/20'
-                        : photoStyle.borderGlow === 'emerald'
-                        ? 'border-emerald-400/90 shadow-xl shadow-emerald-500/25 ring-2 ring-emerald-500/20'
-                        : photoStyle.borderGlow === 'subtle'
-                        ? 'border-slate-600 shadow-lg'
-                        : 'border-slate-800'
-                    }`}
-                  >
-                    {founder.portraitImage ? (
-                      <img
-                        src={founder.portraitImage}
-                        alt={founder.name}
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          const target = e.currentTarget;
-                          if (target.src.includes('/src/assets/images/')) {
-                            target.src = target.src.replace('/src/assets/images/', '/assets/images/');
-                          } else if (target.src.includes('/assets/images/')) {
-                            target.src = target.src.replace('/assets/images/', '/src/assets/images/');
-                          }
-                        }}
-                        style={{
-                          transform: `scale(${photoStyle.zoom || 1.05})`,
-                          filter: `brightness(${photoStyle.brightness || 102}%) contrast(${photoStyle.contrast || 104}%)`,
-                          objectPosition: photoStyle.objectPosition || 'top'
-                        }}
-                        className="w-full h-full object-cover transition-transform duration-200 group-hover/avatar:scale-110"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-500 font-mono text-xl font-bold bg-slate-800">
-                        WS
-                      </div>
-                    )}
+              {/* Founder Header with Large Circular Avatar & Dynamic Radial Cyber Border */}
+              <div className="relative z-10 mt-6 flex flex-col items-center text-center">
+                {/* Circular Expanded Avatar */}
+                <div
+                  className={`relative group/avatar ${isAdmin ? 'cursor-pointer' : ''}`}
+                  onClick={isAdmin ? () => setIsPhotoEditorOpen(true) : undefined}
+                  title={isAdmin ? "Click to customize founder profile photo" : undefined}
+                >
+                  {/* Subtle pulsating cyber-glow backdrop aura */}
+                  <div className="absolute -inset-4 rounded-full bg-gradient-to-tr from-cyan-500/40 via-emerald-500/30 to-blue-500/40 blur-2xl animate-cyber-glow pointer-events-none" />
 
-                    {/* Hover Overlay Button to Edit Photo (Visible to Admin Only) */}
-                    {isAdmin && (
-                      <button
-                        type="button"
-                        onClick={() => setIsPhotoEditorOpen(true)}
-                        className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center gap-1 text-[10px] font-semibold text-cyan-300 transition-opacity backdrop-blur-[2px] cursor-pointer"
-                        title="Click to edit or upload new profile photo"
-                      >
-                        <Camera className="w-4 h-4 text-cyan-400" />
-                        <span>Edit Photo</span>
-                      </button>
-                    )}
+                  {/* Dynamic rotating radial accent border with breathing neon halo */}
+                  <div className="relative w-64 h-64 sm:w-72 sm:h-72 lg:w-80 lg:h-80 rounded-full p-[4px] animate-ring-breathe overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover/avatar:scale-[1.02]">
+                    {/* Rotating Conic-Radial Gradient Element */}
+                    <div className="absolute inset-[-50%] cyber-radial-border animate-radial-spin" />
+
+                    {/* Inner Circular Image Frame */}
+                    <div className="relative w-full h-full rounded-full overflow-hidden bg-slate-950 p-1">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-slate-950 relative">
+                        {founder.portraitImage ? (
+                          <img
+                            src={founder.portraitImage}
+                            alt={founder.name}
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              if (target.src.includes('/src/assets/images/')) {
+                                target.src = target.src.replace('/src/assets/images/', '/assets/images/');
+                              } else if (target.src.includes('/assets/images/')) {
+                                target.src = target.src.replace('/assets/images/', '/src/assets/images/');
+                              }
+                            }}
+                            style={{
+                              transform: `scale(${photoStyle.zoom || 1.05})`,
+                              filter: `brightness(${photoStyle.brightness || 102}%) contrast(${photoStyle.contrast || 104}%)`,
+                              objectPosition: photoStyle.objectPosition || 'top'
+                            }}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover/avatar:scale-105"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-500 font-mono text-4xl font-bold bg-slate-800">
+                            WS
+                          </div>
+                        )}
+
+                        {/* Hover / Click Overlay to Change Photo - Only visible and active for Admin */}
+                        {isAdmin && (
+                          <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center gap-1.5 text-xs font-semibold text-cyan-300 transition-opacity backdrop-blur-[2px]">
+                            <Camera className="w-6 h-6 text-cyan-400" />
+                            <span>Change Photo</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Active Verified Indicator or Admin Edit Trigger */}
-                  {isAdmin ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsPhotoEditorOpen(true)}
-                      className="absolute -bottom-2 -right-1 p-1 rounded-full bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 shadow-md transition-colors"
-                      title="Change Profile Photo (Admin)"
-                    >
-                      <Camera className="w-3 h-3 text-cyan-400" />
-                    </button>
-                  ) : (
-                    <div
-                      className="absolute -bottom-1 -right-1 p-1 rounded-full bg-slate-900 border border-cyan-500/60 text-cyan-400 shadow-md"
-                      title="Verified Principal VMware Architect"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400" />
-                    </div>
-                  )}
+                  {/* Active Verified Indicator */}
+                  <div
+                    className="absolute bottom-3 right-3 p-2 rounded-full bg-slate-900 border-2 border-cyan-400 text-cyan-400 shadow-xl shadow-cyan-500/30 z-20"
+                    title="Verified Principal VMware Architect"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-cyan-400" />
+                  </div>
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-white truncate">
-                      {founder.name}
-                    </h3>
-                    {isAdmin && (
+                {/* Founder Details */}
+                <div className="mt-4 space-y-1">
+                  <h3 className="text-2xl font-black text-white tracking-tight">
+                    {founder.name}
+                  </h3>
+                  <p className="text-sm text-cyan-400 font-semibold tracking-wide">
+                    {founder.role}
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    {founder.location}
+                  </p>
+
+                  {/* Quick Photo Customizer Action - Only visible for Admin */}
+                  {isAdmin && (
+                    <div className="pt-2 flex items-center justify-center gap-2">
                       <button
                         type="button"
                         onClick={() => setIsPhotoEditorOpen(true)}
-                        className="text-[11px] text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 font-medium"
+                        className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-cyan-300 bg-cyan-950/70 hover:bg-cyan-900/90 border border-cyan-500/40 hover:border-cyan-400 transition-all shadow-sm cursor-pointer"
+                        title="Open Profile Photo Studio to upload or adjust founder photo"
                       >
-                        <span>Customize Pic</span>
+                        <Camera className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Customize Photo</span>
                       </button>
-                    )}
-                  </div>
-                  <p className="text-xs text-cyan-400 font-medium mt-0.5">
-                    {founder.role}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    {founder.location}
-                  </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Founder Bio Brief */}
-              <p className="mt-4 text-xs text-slate-300 leading-relaxed border-l-2 border-cyan-500/60 pl-3">
+              <p className="relative z-10 mt-5 text-xs text-slate-300 leading-relaxed border-l-2 border-cyan-500/60 pl-3">
                 "{founder.bio}"
               </p>
 
               {/* Certifications & Badges */}
-              <div className="mt-5 space-y-2">
+              <div className="relative z-10 mt-5 space-y-2">
                 <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   Verified Specializations
                 </div>
@@ -250,7 +252,7 @@ export const Hero: React.FC = () => {
               </div>
 
               {/* Direct Booking Strip */}
-              <div className="mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+              <div className="relative z-10 mt-6 pt-5 border-t border-slate-800/80 flex items-center justify-between text-xs">
                 <span className="text-slate-400">Direct Consultation:</span>
                 <a
                   href={`mailto:${founder.email}`}

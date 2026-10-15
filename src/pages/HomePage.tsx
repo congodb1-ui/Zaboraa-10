@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCustomization } from '../context/CustomizationContext';
 import { Hero } from '../components/Hero';
@@ -13,12 +13,34 @@ import {
   FileSpreadsheet,
   Activity,
   Calendar,
-  Sparkles
+  Sparkles,
+  GripVertical,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  Sliders
 } from 'lucide-react';
 import { resolveMediaUrl } from '../data/mediaAssets';
 
 export const HomePage: React.FC = () => {
-  const { siteConfig, setIsBriefingModalOpen } = useCustomization();
+  const {
+    siteConfig,
+    setIsBriefingModalOpen,
+    isAdmin,
+    reorderPlatformShowcases,
+    movePlatformShowcase,
+    pinPlatformShowcaseToTop,
+    setIsCustomizerOpen
+  } = useCustomization();
+
+  const [draggedPlatformIndex, setDraggedPlatformIndex] = useState<number | null>(null);
+  const [dragOverPlatformIndex, setDragOverPlatformIndex] = useState<number | null>(null);
+  const [orderNotification, setOrderNotification] = useState<string | null>(null);
+
+  const triggerOrderNotification = (msg: string) => {
+    setOrderNotification(msg);
+    setTimeout(() => setOrderNotification(null), 3000);
+  };
 
   return (
     <div className="space-y-16">
@@ -27,7 +49,10 @@ export const HomePage: React.FC = () => {
 
       {/* 2. Interactive Engineering Workbench Teaser Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="p-8 rounded-2xl bg-gradient-to-r from-slate-900 via-cyan-950/40 to-slate-900 border border-cyan-500/30 shadow-2xl relative overflow-hidden">
+        <div
+          data-theme-container="dark"
+          className="dark-card dark-feature-container p-8 rounded-2xl bg-gradient-to-r from-slate-900 via-cyan-950/40 to-slate-900 border border-cyan-500/30 shadow-2xl relative overflow-hidden"
+        >
           <div className="absolute right-0 top-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
           <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="space-y-3 max-w-2xl">
@@ -111,15 +136,185 @@ export const HomePage: React.FC = () => {
           </Link>
         </div>
 
+        {/* Admin Sequence Controls Banner (Only visible for Admin) */}
+        {isAdmin && (
+          <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-950/60 via-slate-900 to-indigo-950/60 border border-cyan-500/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-cyan-500/20 text-cyan-300 shrink-0">
+                <GripVertical className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <div className="font-bold text-white flex items-center gap-2">
+                  <span>Admin Privilege: Drag & Reorder Disciplines Sequence</span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono text-[10px]">
+                    Active
+                  </span>
+                </div>
+                <p className="text-slate-300 text-[11px] leading-relaxed">
+                  Drag any card or use the arrow controls (<ChevronLeft className="inline w-3 h-3 text-cyan-300" /> / <ChevronRight className="inline w-3 h-3 text-cyan-300" />) to reposition. <strong className="text-emerald-300 font-semibold">Primary skills (#1)</strong> are highlighted at the top, while secondary and least-privileged disciplines are arranged last.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsCustomizerOpen(true)}
+                className="px-3.5 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 text-cyan-200 font-semibold text-xs transition cursor-pointer flex items-center gap-1.5"
+                title="Open sequence manager drawer"
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>Open Sequence Studio</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Admin Order Confirmation Notification */}
+        {orderNotification && (
+          <div className="p-3 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-mono flex items-center justify-between shadow-lg animate-fade-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>{orderNotification}</span>
+            </div>
+            <span className="text-[10px] text-emerald-400/80">Saved to Cloud Site Config</span>
+          </div>
+        )}
+
         {/* Dynamic Cards Grid from siteConfig.platformShowcases */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(siteConfig.platformShowcases || []).map(platform => {
+          {(siteConfig.platformShowcases || []).filter(item => isAdmin || item.enabled !== false).map((platform, idx, arr) => {
             const resolvedImg = resolveMediaUrl(platform.imageUrl);
+            const isPrimary = idx === 0;
+            const isSecondary = idx === 1 || idx === 2;
+            const isLeast = idx === arr.length - 1;
+            const isDragging = draggedPlatformIndex === idx;
+            const isDragOver = dragOverPlatformIndex === idx;
+
             return (
               <div
                 key={platform.id}
-                className="flex flex-col justify-between rounded-xl bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800 hover:border-cyan-500/50 transition-all duration-300 group overflow-hidden shadow-lg"
+                draggable={isAdmin}
+                onDragStart={(e) => {
+                  if (!isAdmin) return;
+                  setDraggedPlatformIndex(idx);
+                  e.dataTransfer.setData('text/plain', String(idx));
+                }}
+                onDragOver={(e) => {
+                  if (!isAdmin) return;
+                  e.preventDefault();
+                  if (dragOverPlatformIndex !== idx) {
+                    setDragOverPlatformIndex(idx);
+                  }
+                }}
+                onDragLeave={() => {
+                  if (!isAdmin) return;
+                  if (dragOverPlatformIndex === idx) {
+                    setDragOverPlatformIndex(null);
+                  }
+                }}
+                onDrop={(e) => {
+                  if (!isAdmin) return;
+                  e.preventDefault();
+                  if (draggedPlatformIndex !== null && draggedPlatformIndex !== idx) {
+                    reorderPlatformShowcases(draggedPlatformIndex, idx);
+                    triggerOrderNotification(`Repositioned ${platform.platform} to sequence #${idx + 1}`);
+                  }
+                  setDraggedPlatformIndex(null);
+                  setDragOverPlatformIndex(null);
+                }}
+                onDragEnd={() => {
+                  setDraggedPlatformIndex(null);
+                  setDragOverPlatformIndex(null);
+                }}
+                className={`flex flex-col justify-between rounded-xl bg-slate-900/60 hover:bg-slate-900/90 border transition-all duration-300 group overflow-hidden shadow-lg relative ${
+                  isDragging ? 'opacity-40 scale-[0.98] border-cyan-400' : ''
+                } ${
+                  isDragOver ? 'border-cyan-400 ring-2 ring-cyan-500/50 bg-slate-900' : 'border-slate-800 hover:border-cyan-500/50'
+                } ${
+                  isPrimary && !isAdmin ? 'ring-1 ring-emerald-500/30' : ''
+                }`}
               >
+                {/* Admin Drag Handle & Priority Reorder Header */}
+                {isAdmin && (
+                  <div className="px-3 py-2 bg-slate-950/95 border-b border-slate-800 flex items-center justify-between text-xs font-mono">
+                    <div className="flex items-center gap-1.5">
+                      <div
+                        className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-slate-400 hover:text-cyan-300 hover:bg-slate-900 rounded transition"
+                        title="Drag card to reorder sequence"
+                      >
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                      {isPrimary ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/50 text-emerald-300 shadow-sm shadow-emerald-500/20">
+                          <Star className="w-3 h-3 text-emerald-400 fill-current" />
+                          #1 PRIMARY SKILL
+                        </span>
+                      ) : isSecondary ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300">
+                          #{idx + 1} SECONDARY
+                        </span>
+                      ) : isLeast ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+                          #{idx + 1} LEAST PRIVILEGE
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+                          #{idx + 1}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      {!isPrimary && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            pinPlatformShowcaseToTop(platform.id);
+                            triggerOrderNotification(`Set ${platform.platform} as #1 Primary Skill!`);
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-slate-900 hover:bg-emerald-950 border border-slate-800 hover:border-emerald-500/40 text-slate-400 hover:text-emerald-300 transition cursor-pointer flex items-center gap-0.5"
+                          title="Pin as #1 Primary Skill"
+                        >
+                          <Star className="w-3 h-3 text-amber-400" />
+                          <span className="hidden sm:inline">Top</span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        disabled={idx === 0}
+                        onClick={() => {
+                          movePlatformShowcase(platform.id, 'up');
+                          triggerOrderNotification(`Moved ${platform.platform} up`);
+                        }}
+                        className={`p-1 rounded border transition cursor-pointer ${
+                          idx === 0
+                            ? 'opacity-30 border-slate-900 text-slate-600 cursor-not-allowed'
+                            : 'border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 hover:bg-slate-900'
+                        }`}
+                        title="Move left/up in sequence"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={idx === arr.length - 1}
+                        onClick={() => {
+                          movePlatformShowcase(platform.id, 'down');
+                          triggerOrderNotification(`Moved ${platform.platform} down`);
+                        }}
+                        className={`p-1 rounded border transition cursor-pointer ${
+                          idx === arr.length - 1
+                            ? 'opacity-30 border-slate-900 text-slate-600 cursor-not-allowed'
+                            : 'border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 hover:bg-slate-900'
+                        }`}
+                        title="Move right/down in sequence"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Image Header with Scrim */}
                 <div className="relative h-48 w-full bg-slate-950 overflow-hidden">
                   <img
@@ -132,10 +327,17 @@ export const HomePage: React.FC = () => {
                     }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-                  <div className="absolute top-3 left-3">
+                  <div className="absolute top-3 left-3 flex items-center gap-2">
                     <span className="text-[10px] font-mono font-semibold px-2.5 py-1 rounded bg-slate-950/80 border border-slate-800 text-cyan-300 backdrop-blur-md">
                       {platform.badge}
                     </span>
+                    {/* Primary Highlight Badge in Public View */}
+                    {!isAdmin && isPrimary && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2.5 py-1 rounded bg-emerald-950/90 border border-emerald-500/50 text-emerald-300 backdrop-blur-md shadow-md">
+                        <Star className="w-3 h-3 text-emerald-400 fill-current" />
+                        PRIMARY DISCIPLINE
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -155,9 +357,9 @@ export const HomePage: React.FC = () => {
 
                   {/* Tech Tags */}
                   <div className="flex flex-wrap gap-1.5 pt-2">
-                    {platform.techTags.slice(0, 3).map((tag, idx) => (
+                    {platform.techTags.slice(0, 3).map((tag, tagIdx) => (
                       <span
-                        key={idx}
+                        key={tagIdx}
                         className="text-[10px] font-mono text-slate-400 bg-slate-950/80 border border-slate-800/80 px-2 py-0.5 rounded"
                       >
                         {tag}
@@ -192,7 +394,10 @@ export const HomePage: React.FC = () => {
 
       {/* 5. Executive Advisory CTA Banner */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-        <div className="p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-4">
+        <div
+          data-theme-container="dark"
+          className="dark-card dark-feature-container p-8 rounded-2xl bg-slate-900 border border-slate-800 text-center space-y-4"
+        >
           <h2 className="text-2xl sm:text-3xl font-bold text-white">
             Plan Your Cloud Architecture with Lead Principal Architect Wasim Sayyed
           </h2>

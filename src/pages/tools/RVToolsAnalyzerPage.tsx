@@ -56,7 +56,6 @@ import {
 } from '../../utils/storageCalculator';
 import { MigrationPlanner } from '../../components/MigrationPlanner';
 import { AriaNetworkDeepDiveSection } from '../../components/AriaNetworkDeepDiveSection';
-import { GOOGLE_DRIVE_CONFIG } from '../../data/mediaAssets';
 
 // Cloud Bare-Metal Node SKUs (Technical specifications only - ZERO COSTING)
 interface CloudSkuInfo {

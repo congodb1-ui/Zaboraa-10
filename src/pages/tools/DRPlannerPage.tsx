@@ -18,11 +18,8 @@ import {
   Printer,
   Server,
   Zap,
-  FolderGit2,
-  ExternalLink,
   FileText
 } from 'lucide-react';
-import { GOOGLE_DRIVE_CONFIG } from '../../data/mediaAssets';
 
 type DREngineType = 'srm' | 'zerto' | 'jetstream' | 'veeam';
 type DRDeploymentStrategy = 'hotStandby' | 'pilotLight' | 'coldStorage';

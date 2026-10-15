@@ -1,8 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCustomization } from '../context/CustomizationContext';
-import { ShieldCheck, Phone, Mail, ArrowUp, FolderGit2, ExternalLink } from 'lucide-react';
-import { GOOGLE_DRIVE_CONFIG } from '../data/mediaAssets';
+import { ShieldCheck, Phone, Mail, ArrowUp, FolderGit2 } from 'lucide-react';
 import { ZaboraaLogoMark } from './ZaboraaLogo';
 
 export const Footer: React.FC = () => {
@@ -33,25 +32,15 @@ export const Footer: React.FC = () => {
             <p className="text-slate-400 leading-relaxed max-w-sm">
               {siteConfig.brandTagline}. Architecting high-consequence hybrid cloud evacuations and sovereign VMware environments across Azure AVS, AWS VMC, and Google Cloud GCVE.
             </p>
-            <div className="pt-1 flex items-center gap-3 text-slate-400">
+            <div className="pt-1 flex flex-wrap items-center gap-3 text-slate-400">
               <div className="flex items-center gap-1 text-emerald-400">
                 <ShieldCheck className="w-4 h-4" />
                 <span className="font-semibold">NDA Protected Engagement</span>
               </div>
-            </div>
-
-            {/* Google Drive Workspace Badge */}
-            <div className="pt-2">
-              <a
-                href={GOOGLE_DRIVE_CONFIG.folderUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-cyan-500/30 text-cyan-300 text-xs hover:border-cyan-400 transition-colors"
-              >
-                <FolderGit2 className="w-3.5 h-3.5 text-cyan-400" />
+              <div className="flex items-center gap-1.5 text-indigo-400 font-mono text-[11px]">
+                <FolderGit2 className="w-4 h-4" />
                 <span>Google Drive Cloud Workspace</span>
-                <ExternalLink className="w-3 h-3 text-slate-500" />
-              </a>
+              </div>
             </div>
           </div>
 

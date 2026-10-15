@@ -30,7 +30,10 @@ import {
   CheckCircle2,
   Zap,
   Shield,
-  FileText
+  FileText,
+  GripVertical,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 
 export const CustomizerDrawer: React.FC = () => {
@@ -48,6 +51,9 @@ export const CustomizerDrawer: React.FC = () => {
     setFeaturedVideoId,
     updateGeneralInfo,
     togglePlatformEnabled,
+    reorderPlatformShowcases,
+    movePlatformShowcase,
+    pinPlatformShowcaseToTop,
     toggleDesignEnabled,
     updateHero,
     addDiagram,
@@ -65,6 +71,10 @@ export const CustomizerDrawer: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<string>('');
   const [importText, setImportText] = useState<string>('');
   const [importError, setImportError] = useState<string>('');
+
+  // Disciplines drag and drop sequence state
+  const [draggedDisciplineIndex, setDraggedDisciplineIndex] = useState<number | null>(null);
+  const [dragOverDisciplineIndex, setDragOverDisciplineIndex] = useState<number | null>(null);
 
   // General state
   const [brand, setBrand] = useState(siteConfig.brand);
@@ -1170,90 +1180,221 @@ export const CustomizerDrawer: React.FC = () => {
             </form>
           )}
 
-          {/* TAB 3: DEDICATED ARCHITECTURES */}
+          {/* TAB 3: DEDICATED ARCHITECTURES & DISCIPLINES SEQUENCE */}
           {activeTab === 'platforms' && (
             <div className="space-y-6 text-xs">
-              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
-                <div className="font-semibold text-white flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Dedicated Architecture Platforms & Solutions ({siteConfig.platformShowcases?.length || 6})</span>
+              <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                <div className="font-semibold text-white flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Disciplines & Skills Sequence Manager ({siteConfig.platformShowcases?.length || 6})</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950 border border-cyan-800 text-cyan-300">
+                    Admin Drag & Priority
+                  </span>
                 </div>
                 <p className="text-slate-400 text-[11px] leading-relaxed">
-                  Customize the dedicated sections for AVS, GCVE, VMC on AWS, NSX, HCX, and SRM: upload architecture diagrams, add designs, set video walkthroughs, and edit descriptions.
+                  Drag the handles or click the sequence arrows to arrange priority. <strong className="text-emerald-400 font-semibold">Primary skills (#1)</strong> are highlighted at the top of the homepage and in navigation, followed by secondary platforms, with least-privileged skills placed last.
                 </p>
               </div>
 
               <div className="space-y-3">
-                {(siteConfig.platformShowcases || []).map(p => (
-                  <div
-                    key={p.id}
-                    className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-16 h-11 rounded-lg overflow-hidden bg-slate-900 border border-slate-800 shrink-0">
-                          <img
-                            src={p.imageUrl}
-                            alt={p.title}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-white text-xs">{p.platform}</span>
-                            <span className="text-[10px] text-cyan-400 font-mono bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800">
-                              {p.badge}
+                {(siteConfig.platformShowcases || []).map((p, idx, arr) => {
+                  const isPrimary = idx === 0;
+                  const isSecondary = idx === 1 || idx === 2;
+                  const isLeast = idx === arr.length - 1;
+                  const isDragging = draggedDisciplineIndex === idx;
+                  const isDragOver = dragOverDisciplineIndex === idx;
+
+                  return (
+                    <div
+                      key={p.id}
+                      draggable
+                      onDragStart={(e) => {
+                        setDraggedDisciplineIndex(idx);
+                        e.dataTransfer.setData('text/plain', String(idx));
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        if (dragOverDisciplineIndex !== idx) {
+                          setDragOverDisciplineIndex(idx);
+                        }
+                      }}
+                      onDragLeave={() => {
+                        if (dragOverDisciplineIndex === idx) {
+                          setDragOverDisciplineIndex(null);
+                        }
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (draggedDisciplineIndex !== null && draggedDisciplineIndex !== idx) {
+                          reorderPlatformShowcases(draggedDisciplineIndex, idx);
+                          showNotification(`Moved ${p.platform} to position #${idx + 1}`);
+                        }
+                        setDraggedDisciplineIndex(null);
+                        setDragOverDisciplineIndex(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggedDisciplineIndex(null);
+                        setDragOverDisciplineIndex(null);
+                      }}
+                      className={`p-4 bg-slate-950 rounded-xl border transition-all duration-200 space-y-3 relative ${
+                        isDragging ? 'opacity-40 scale-[0.98] border-cyan-400/60' : ''
+                      } ${
+                        isDragOver ? 'border-cyan-400 ring-2 ring-cyan-500/40 bg-slate-900/90' : 'border-slate-800 hover:border-slate-700'
+                      } ${
+                        isPrimary ? 'ring-1 ring-emerald-500/30 bg-gradient-to-r from-emerald-950/20 via-slate-950 to-slate-950' : ''
+                      }`}
+                    >
+                      {/* Priority Tag Header & Sequence Reorder Controls */}
+                      <div className="flex items-center justify-between pb-2 border-b border-slate-900/80">
+                        <div className="flex items-center gap-2">
+                          {/* Drag Handle */}
+                          <div
+                            className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-slate-500 hover:text-cyan-400 hover:bg-slate-900 rounded transition"
+                            title="Drag to reposition discipline sequence"
+                          >
+                            <GripVertical className="w-4 h-4" />
+                          </div>
+
+                          {/* Skill Sequence / Privilege Badge */}
+                          {isPrimary ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-950 border border-emerald-500/50 text-emerald-300 shadow-sm shadow-emerald-500/20">
+                              <Star className="w-3 h-3 text-emerald-400 fill-current" />
+                              #1 PRIMARY SKILL
                             </span>
-                            <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase ${
+                          ) : isSecondary ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300">
+                              #{idx + 1} SECONDARY SKILL
+                            </span>
+                          ) : isLeast ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+                              #{idx + 1} LEAST PRIVILEGE / TERTIARY
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded-full bg-slate-900/70 border border-slate-800">
+                              #{idx + 1} CORE DISCIPLINE
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Move Up / Down Arrow & Pin to Top Buttons */}
+                        <div className="flex items-center gap-1">
+                          {!isPrimary && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                pinPlatformShowcaseToTop(p.id);
+                                showNotification(`Set ${p.platform} as #1 Primary Skill!`);
+                              }}
+                              className="px-2 py-1 text-[10px] font-mono rounded bg-slate-900 hover:bg-emerald-950/80 border border-slate-800 hover:border-emerald-500/40 text-slate-400 hover:text-emerald-300 flex items-center gap-1 transition cursor-pointer"
+                              title="Pin this discipline to position #1 Primary"
+                            >
+                              <Star className="w-3 h-3 text-amber-400" />
+                              <span className="hidden sm:inline">Make #1</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            disabled={idx === 0}
+                            onClick={() => {
+                              movePlatformShowcase(p.id, 'up');
+                              showNotification(`Moved ${p.platform} up`);
+                            }}
+                            className={`p-1 rounded border transition cursor-pointer ${
+                              idx === 0
+                                ? 'opacity-30 border-slate-900 text-slate-600 cursor-not-allowed'
+                                : 'border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 hover:bg-slate-900'
+                            }`}
+                            title="Move up in sequence"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            disabled={idx === arr.length - 1}
+                            onClick={() => {
+                              movePlatformShowcase(p.id, 'down');
+                              showNotification(`Moved ${p.platform} down`);
+                            }}
+                            className={`p-1 rounded border transition cursor-pointer ${
+                              idx === arr.length - 1
+                                ? 'opacity-30 border-slate-900 text-slate-600 cursor-not-allowed'
+                                : 'border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-cyan-300 hover:bg-slate-900'
+                            }`}
+                            title="Move down in sequence"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-16 h-11 rounded-lg overflow-hidden bg-slate-900 border border-slate-800 shrink-0">
+                            <img
+                              src={p.imageUrl}
+                              alt={p.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-white text-xs">{p.platform}</span>
+                              <span className="text-[10px] text-cyan-400 font-mono bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-800">
+                                {p.badge}
+                              </span>
+                              <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold uppercase ${
+                                p.enabled !== false
+                                  ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
+                                  : 'bg-rose-950 text-rose-300 border border-rose-800'
+                              }`}>
+                                {p.enabled !== false ? 'Active' : 'Disabled'}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                              {p.title}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              togglePlatformEnabled(p.id);
+                              showNotification(`Discipline ${p.platform} ${p.enabled === false ? 'enabled' : 'disabled'}!`);
+                            }}
+                            className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border transition-colors cursor-pointer ${
                               p.enabled !== false
-                                ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                                : 'bg-rose-950 text-rose-300 border border-rose-800'
-                            }`}>
-                              {p.enabled !== false ? 'Active' : 'Disabled'}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
-                            {p.title}
-                          </div>
+                                ? 'bg-emerald-950 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900'
+                                : 'bg-rose-950 border-rose-500/50 text-rose-300 hover:bg-rose-900'
+                            }`}
+                            title={p.enabled !== false ? 'Click to disable discipline' : 'Click to enable discipline'}
+                          >
+                            {p.enabled !== false ? 'Active' : 'Disabled'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActiveEditPlatformId(p.id)}
+                            className="px-3 py-1.5 bg-cyan-950 hover:bg-cyan-900 border border-cyan-800 text-cyan-300 font-semibold rounded-lg text-xs flex items-center gap-1 transition-colors whitespace-nowrap cursor-pointer"
+                          >
+                            <span>Edit</span>
+                          </button>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            togglePlatformEnabled(p.id);
-                            showNotification(`Discipline ${p.platform} ${p.enabled === false ? 'enabled' : 'disabled'}!`);
-                          }}
-                          className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg border transition-colors cursor-pointer ${
-                            p.enabled !== false
-                              ? 'bg-emerald-950 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900'
-                              : 'bg-rose-950 border-rose-500/50 text-rose-300 hover:bg-rose-900'
-                          }`}
-                          title={p.enabled !== false ? 'Click to disable discipline' : 'Click to enable discipline'}
-                        >
-                          {p.enabled !== false ? 'Active' : 'Disabled'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setActiveEditPlatformId(p.id)}
-                          className="px-3 py-1.5 bg-cyan-950 hover:bg-cyan-900 border border-cyan-800 text-cyan-300 font-semibold rounded-lg text-xs flex items-center gap-1 transition-colors whitespace-nowrap cursor-pointer"
-                        >
-                          <span>Edit</span>
-                        </button>
+                      <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                        {p.description}
+                      </p>
+
+                      <div className="pt-2 border-t border-slate-900 flex items-center justify-between text-[11px] text-slate-500">
+                        <span>Subsections: <span className="text-cyan-400 font-mono font-semibold">{p.designs?.length || 0} Modules</span></span>
+                        <span>{p.keyDeliverables?.length || 0} Key Deliverables</span>
                       </div>
                     </div>
-
-                    <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                      {p.description}
-                    </p>
-
-                    <div className="pt-2 border-t border-slate-900 flex items-center justify-between text-[11px] text-slate-500">
-                      <span>Subsections: <span className="text-cyan-400 font-mono font-semibold">{p.designs?.length || 0} Modules</span></span>
-                      <span>{p.keyDeliverables?.length || 0} Key Deliverables</span>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

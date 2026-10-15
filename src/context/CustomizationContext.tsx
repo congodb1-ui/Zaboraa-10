@@ -80,6 +80,9 @@ interface CustomizationContextType {
   addPlatformShowcase: (platform: PlatformShowcase) => void;
   deletePlatformShowcase: (id: string) => void;
   togglePlatformEnabled: (id: string) => void;
+  reorderPlatformShowcases: (startIndex: number, endIndex: number) => void;
+  movePlatformShowcase: (id: string, direction: 'up' | 'down') => void;
+  pinPlatformShowcaseToTop: (id: string) => void;
   addPlatformDesign: (platformId: string, design: ArchitectureDesignItem) => void;
   updatePlatformDesign: (platformId: string, designId: string, updated: Partial<ArchitectureDesignItem>) => void;
   deletePlatformDesign: (platformId: string, designId: string) => void;
@@ -452,6 +455,51 @@ export const CustomizationProvider: React.FC<{ children: React.ReactNode }> = ({
     }));
   };
 
+  const reorderPlatformShowcases = (startIndex: number, endIndex: number) => {
+    setSiteConfig(prev => {
+      const list = [...(prev.platformShowcases || INITIAL_SITE_DATA.platformShowcases)];
+      if (startIndex < 0 || startIndex >= list.length || endIndex < 0 || endIndex >= list.length) {
+        return prev;
+      }
+      const [movedItem] = list.splice(startIndex, 1);
+      list.splice(endIndex, 0, movedItem);
+      return {
+        ...prev,
+        platformShowcases: list
+      };
+    });
+  };
+
+  const movePlatformShowcase = (id: string, direction: 'up' | 'down') => {
+    setSiteConfig(prev => {
+      const list = [...(prev.platformShowcases || INITIAL_SITE_DATA.platformShowcases)];
+      const index = list.findIndex(p => p.id === id);
+      if (index === -1) return prev;
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= list.length) return prev;
+      const [movedItem] = list.splice(index, 1);
+      list.splice(targetIndex, 0, movedItem);
+      return {
+        ...prev,
+        platformShowcases: list
+      };
+    });
+  };
+
+  const pinPlatformShowcaseToTop = (id: string) => {
+    setSiteConfig(prev => {
+      const list = [...(prev.platformShowcases || INITIAL_SITE_DATA.platformShowcases)];
+      const index = list.findIndex(p => p.id === id);
+      if (index <= 0) return prev;
+      const [item] = list.splice(index, 1);
+      list.unshift(item);
+      return {
+        ...prev,
+        platformShowcases: list
+      };
+    });
+  };
+
   const addPlatformDesign = (platformId: string, design: ArchitectureDesignItem) => {
     setSiteConfig(prev => ({
       ...prev,
@@ -657,6 +705,9 @@ export const CustomizationProvider: React.FC<{ children: React.ReactNode }> = ({
         addPlatformShowcase,
         deletePlatformShowcase,
         togglePlatformEnabled,
+        reorderPlatformShowcases,
+        movePlatformShowcase,
+        pinPlatformShowcaseToTop,
         addPlatformDesign,
         updatePlatformDesign,
         deletePlatformDesign,

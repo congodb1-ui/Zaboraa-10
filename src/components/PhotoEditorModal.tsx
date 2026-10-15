@@ -84,7 +84,10 @@ export const PhotoEditorModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/85 backdrop-blur-md p-4 sm:p-6 lg:p-10 flex items-center justify-center animate-in fade-in duration-150">
-      <div className="relative w-full max-w-2xl bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6">
+      <div
+        data-theme-container="dark"
+        className="dark-card dark-feature-container relative w-full max-w-2xl bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-8 shadow-2xl space-y-6"
+      >
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -98,7 +101,7 @@ export const PhotoEditorModal: React.FC = () => {
           </div>
           <button
             onClick={() => setIsPhotoEditorOpen(false)}
-            className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-lg"
+            className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-lg cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -112,10 +115,10 @@ export const PhotoEditorModal: React.FC = () => {
               <span>Live Site Preview</span>
             </div>
 
-            {/* Circular / Rounded Avatar Preview Frame with Dynamic Styles */}
+            {/* Circular Avatar Preview Frame with Dynamic Styles */}
             <div className="relative group">
               <div
-                className={`w-36 h-36 rounded-2xl overflow-hidden transition-all duration-200 border-2 ${
+                className={`w-36 h-36 rounded-full overflow-hidden transition-all duration-200 border-2 ${
                   borderGlow === 'cyan'
                     ? 'border-cyan-400 shadow-xl shadow-cyan-500/25 ring-2 ring-cyan-500/20'
                     : borderGlow === 'emerald'

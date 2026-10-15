@@ -1,15 +1,13 @@
-// Centralized Google Drive & Media Assets Configuration
-// Allows hosting images, videos, and PDFs on Google Drive with fallback to bundled local assets.
+// Centralized Media Assets Configuration
+// Resolves image and asset paths with fallback to bundled local assets.
+
+export const ISOMETRIC_BLUEPRINT_3D_FALLBACK = '/assets/images/blueprint_3d_isometric_1791610246387.jpg';
 
 export const GOOGLE_DRIVE_CONFIG = {
   folderId: '1sFG8NLUcajo8DuCs7jq9ChYK-rksx7Io',
-  folderUrl: 'https://drive.google.com/drive/folders/1sFG8NLUcajo8DuCs7jq9ChYK-rksx7Io?usp=sharing',
-  shareBaseUrl: 'https://drive.google.com/file/d/',
-  previewBaseUrl: 'https://drive.google.com/file/d/{id}/preview',
-  thumbnailBaseUrl: 'https://lh3.googleusercontent.com/d/',
+  folderUrl: 'https://drive.google.com/drive/folders/1sFG8NLUcajo8DuCs7jq9ChYK-rksx7Io',
+  label: 'Google Drive Architecture Repository'
 };
-
-export const ISOMETRIC_BLUEPRINT_3D_FALLBACK = '/assets/images/blueprint_3d_isometric_1791610246387.jpg';
 
 /**
  * Resolves a media URL.
