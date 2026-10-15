@@ -422,6 +422,24 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
     steps: [
       {
         stepNumber: 1,
+        title: 'Workload Discovery, i4i Sizing & Cloud Readiness Assessment',
+        lifecycleStage: 'stage-1-discovery',
+        stageName: '1. Discovery and Assessment',
+        actor: 'Cloud Migration Architect',
+        description: 'Execute RVTools inventory collection. Model compute, memory, and vSAN raw storage demands against AWS i4i.metal bare-metal specifications (64 cores, 1024 GB RAM, 30 TB NVMe).',
+        commandOrAction: {
+          type: 'PowerCLI',
+          code: 'Connect-VIServer -Server vcenter.corp.local; Get-VM | Select-Object Name, NumCpu, MemoryGB, UsedSpaceGB | Export-Csv -Path ./vmc-discovery.csv',
+          explanation: 'Inventories VM footprint for VMC i4i.metal cluster sizing.'
+        },
+        prerequisites: ['vCenter administrative credentials'],
+        validationCheck: 'Verify all source workloads catalogued with CPU, RAM, and storage baselines.',
+        rollbackConsideration: 'Zero impact: Read-only inventory stage.',
+        isVendorDocumentedFact: true,
+        citationRef: 'vmcGettingStarted'
+      },
+      {
+        stepNumber: 2,
         title: 'AWS Connected Account Linking & Connected VPC Setup',
         lifecycleStage: 'stage-2-prerequisites',
         stageName: '2. Prerequisites and Readiness',
@@ -445,7 +463,7 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         ]
       },
       {
-        stepNumber: 2,
+        stepNumber: 3,
         title: 'i4i.metal SDDC Deployment & AWS Direct Connect Peering',
         lifecycleStage: 'stage-2-prerequisites',
         stageName: '2. Prerequisites and Readiness',
@@ -466,7 +484,7 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         citationRef: 'vmcGettingStarted'
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
         title: 'Deploy HCX Cloud Interconnect & L2 Network Extension',
         lifecycleStage: 'stage-3-network-prep',
         stageName: '3. Network and Security Preparation',
@@ -484,7 +502,25 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         citationRef: 'vmcHcx'
       },
       {
-        stepNumber: 4,
+        stepNumber: 5,
+        title: 'Pilot Wave Canary Migration to VMC',
+        lifecycleStage: 'stage-4-pilot-migration',
+        stageName: '4. Pilot Migration',
+        actor: 'Cloud Migration Architect',
+        description: 'Execute pilot migration of 5 non-production staging VMs using VMware HCX RAV to validate throughput and network connectivity on AWS.',
+        commandOrAction: {
+          type: 'Portal-UI',
+          code: 'VMC HCX Portal > Migration > Select Staging VMs > Type: RAV > Target Cluster: Cluster-1 > Migrate',
+          explanation: 'Replicates pilot VMs into VMC WorkloadDatastore.'
+        },
+        prerequisites: ['HCX Service Mesh healthy and online'],
+        validationCheck: 'Canary VMs power on successfully and pass synthetic HTTP health checks.',
+        rollbackConsideration: 'Reverse migrate canary VMs to on-premises.',
+        isVendorDocumentedFact: true,
+        citationRef: 'vmcHcx'
+      },
+      {
+        stepNumber: 6,
         title: 'Workload Migration Waves with Replication-Assisted vMotion (RAV)',
         lifecycleStage: 'stage-5-workload-evacuation',
         stageName: '5. Workload Migration and Evacuation',
@@ -502,7 +538,25 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         citationRef: 'vmcHcx'
       },
       {
-        stepNumber: 5,
+        stepNumber: 7,
+        title: 'Scheduled Maintenance Window Cutover',
+        lifecycleStage: 'stage-6-cutover',
+        stageName: '6. Cutover',
+        actor: 'Cloud Migration Architect',
+        description: 'Initiate final cutover for active wave. HCX quiesces source VM, commits final delta changes, and transfers active execution to VMC i4i host.',
+        commandOrAction: {
+          type: 'Portal-UI',
+          code: 'HCX Migration > Action: Cutover Now',
+          explanation: 'Switches primary compute to VMC on AWS.'
+        },
+        prerequisites: ['Maintenance window approved', 'Delta sync 100% complete'],
+        validationCheck: 'Verify VM is active on VMC and responding on target network segment.',
+        rollbackConsideration: 'Power on original source VM if target fails post-cutover verification.',
+        isVendorDocumentedFact: true,
+        citationRef: 'vmcHcx'
+      },
+      {
+        stepNumber: 8,
         title: 'Native AWS Service Integration & NSX Microsegmentation',
         lifecycleStage: 'stage-7-validation',
         stageName: '7. Functional and Performance Validation',
@@ -516,6 +570,24 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         prerequisites: ['Workloads running in VMC'],
         validationCheck: 'Ping latency from VMC VM to Connected VPC EC2 instance < 1 ms.',
         rollbackConsideration: 'Revert DFW rules in NSX manager if rules block legitimate application traffic.',
+        isVendorDocumentedFact: true,
+        citationRef: 'vmcGettingStarted'
+      },
+      {
+        stepNumber: 9,
+        title: 'Network Gateway De-extension & Post-Migration Closure',
+        lifecycleStage: 'stage-9-post-migration-closure',
+        stageName: '9. Post-Migration Optimization and Closure',
+        actor: 'Network Engineer',
+        description: 'Unextend L2 networks in HCX and transition default gateways to NSX Tier-1 in VMC. Decommission legacy on-premises VM assets.',
+        commandOrAction: {
+          type: 'Portal-UI',
+          code: 'VMC HCX > Network Extension > Unextend > Set NSX Gateway Active',
+          explanation: 'Directs all traffic natively through VMC NSX router.'
+        },
+        prerequisites: ['100% of workload cutover completed on VLAN'],
+        validationCheck: 'Traceroute confirms direct egress via VMC Tier-0 gateway.',
+        rollbackConsideration: 'Re-extend network if on-prem dependency is found.',
         isVendorDocumentedFact: true,
         citationRef: 'vmcGettingStarted'
       }
@@ -551,6 +623,24 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
     steps: [
       {
         stepNumber: 1,
+        title: 'Workload Discovery & Google Cloud Network Sizing',
+        lifecycleStage: 'stage-1-discovery',
+        stageName: '1. Discovery and Assessment',
+        actor: 'Cloud Migration Architect',
+        description: 'Collect virtual inventory via RVTools and Aria Operations for Networks. Identify VM egress patterns to Google native APIs and dimension GCVE node requirements.',
+        commandOrAction: {
+          type: 'PowerCLI',
+          code: 'Connect-VIServer -Server vcenter.corp.local; Get-VM | Select-Object Name, NumCpu, MemoryGB, UsedSpaceGB | Export-Csv -Path ./gcve-discovery.csv',
+          explanation: 'Inventories VM footprint for GCVE ve1-standard-72 sizing.'
+        },
+        prerequisites: ['vCenter administrative credentials'],
+        validationCheck: 'Verify all source workloads catalogued with CPU, RAM, and storage baselines.',
+        rollbackConsideration: 'Zero impact: Read-only inventory stage.',
+        isVendorDocumentedFact: true,
+        citationRef: 'gcveQuickstart'
+      },
+      {
+        stepNumber: 2,
         title: 'Allocate /22 or /24 Management CIDR & Private Cloud Creation',
         lifecycleStage: 'stage-2-prerequisites',
         stageName: '2. Prerequisites and Readiness',
@@ -571,7 +661,7 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         citationRef: 'gcveQuickstart'
       },
       {
-        stepNumber: 2,
+        stepNumber: 3,
         title: 'VPC Peering via Private Services Access (PSA) & Cloud Interconnect',
         lifecycleStage: 'stage-3-network-prep',
         stageName: '3. Network and Security Preparation',
@@ -592,7 +682,25 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         citationRef: 'gcveQuickstart'
       },
       {
-        stepNumber: 3,
+        stepNumber: 4,
+        title: 'GCVE Pilot Wave Canary Migration',
+        lifecycleStage: 'stage-4-pilot-migration',
+        stageName: '4. Pilot Migration',
+        actor: 'Cloud Migration Architect',
+        description: 'Execute pilot migration of 5 non-production staging VMs using VMware HCX RAV to validate throughput and network connectivity.',
+        commandOrAction: {
+          type: 'Portal-UI',
+          code: 'GCVE HCX Portal > Migration > Select Staging VMs > Type: RAV > Target Cluster: cluster-1 > Migrate',
+          explanation: 'Replicates pilot VMs into GCVE vSAN datastore.'
+        },
+        prerequisites: ['HCX Service Mesh healthy and online'],
+        validationCheck: 'Canary VMs power on successfully and pass synthetic HTTP health checks.',
+        rollbackConsideration: 'Reverse migrate canary VMs to on-premises.',
+        isVendorDocumentedFact: true,
+        citationRef: 'gcveHcx'
+      },
+      {
+        stepNumber: 5,
         title: 'HCX Service Mesh Deployment & Workload Replication',
         lifecycleStage: 'stage-5-workload-evacuation',
         stageName: '5. Workload Migration and Evacuation',
@@ -610,7 +718,25 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         citationRef: 'gcveHcx'
       },
       {
-        stepNumber: 4,
+        stepNumber: 6,
+        title: 'Scheduled Maintenance Window Cutover to GCVE',
+        lifecycleStage: 'stage-6-cutover',
+        stageName: '6. Cutover',
+        actor: 'Cloud Migration Architect',
+        description: 'Initiate final cutover. HCX quiesces source VM, synchronizes final memory changes, and activates VM on GCVE bare-metal host.',
+        commandOrAction: {
+          type: 'Portal-UI',
+          code: 'HCX Migration > Action: Cutover Now',
+          explanation: 'Switches primary compute to GCVE.'
+        },
+        prerequisites: ['Maintenance window approved', 'Delta sync 100% complete'],
+        validationCheck: 'Verify VM is active on GCVE and responding on target network segment.',
+        rollbackConsideration: 'Power on original source VM if target fails post-cutover verification.',
+        isVendorDocumentedFact: true,
+        citationRef: 'gcveHcx'
+      },
+      {
+        stepNumber: 7,
         title: 'Google BigQuery & Vertex AI High-Throughput Peering Validation',
         lifecycleStage: 'stage-7-validation',
         stageName: '7. Functional and Performance Validation',
@@ -624,6 +750,24 @@ export const PLATFORM_MIGRATION_RUNBOOKS: PlatformMigrationRunbook[] = [
         prerequisites: ['Private Google Access enabled on VPC'],
         validationCheck: 'Sub-millisecond latency to Google Cloud native APIs within the same region.',
         rollbackConsideration: 'N/A: Performance benchmark step.',
+        isVendorDocumentedFact: true,
+        citationRef: 'gcveQuickstart'
+      },
+      {
+        stepNumber: 8,
+        title: 'Network Gateway De-extension & Post-Migration Closure',
+        lifecycleStage: 'stage-9-post-migration-closure',
+        stageName: '9. Post-Migration Optimization and Closure',
+        actor: 'Network Engineer',
+        description: 'Unextend L2 networks in HCX and transition default gateways to NSX Tier-1 in GCVE. Decommission legacy on-premises VM assets.',
+        commandOrAction: {
+          type: 'Portal-UI',
+          code: 'GCVE HCX > Network Extension > Unextend > Set NSX Gateway Active',
+          explanation: 'Directs all traffic natively through GCVE NSX router.'
+        },
+        prerequisites: ['100% of workload cutover completed on VLAN'],
+        validationCheck: 'Traceroute confirms direct egress via GCVE Tier-0 gateway.',
+        rollbackConsideration: 'Re-extend network if on-prem dependency is found.',
         isVendorDocumentedFact: true,
         citationRef: 'gcveQuickstart'
       }

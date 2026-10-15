@@ -4,7 +4,7 @@
  * network boundary validation, and bitwise subnet collision/overlap detection.
  */
 
-export type CloudPlatformNetworkType = 'azure' | 'aws' | 'gcp' | 'on-premise' | 'avs' | 'gcve';
+export type CloudPlatformNetworkType = 'azure' | 'aws' | 'gcp' | 'on-premise' | 'on-prem' | 'avs' | 'gcve';
 
 export interface CidrParsedResult {
   isValid: boolean;
@@ -73,7 +73,7 @@ export function integerToIp(intVal: number): string {
  */
 export function getReservedAddressCount(
   platform: CloudPlatformNetworkType,
-  prefix: number
+  prefix: number = 24
 ): number {
   if (prefix >= 31) {
     return 0; // RFC 3021 / host route
@@ -87,6 +87,7 @@ export function getReservedAddressCount(
     case 'gcve':
       return 4;
     case 'on-premise':
+    case 'on-prem':
     default:
       return 2;
   }

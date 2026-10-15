@@ -787,6 +787,45 @@ export const Step1ScopeAndSource: React.FC<Step1ScopeAndSourceProps> = ({
                 />
               </div>
             </div>
+
+            {/* Aria Operations & Automation Management Stack Assumptions */}
+            <div className="pt-2.5 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={wizardState.assumptions.ariaOperationsIncluded !== false}
+                  onChange={(e) =>
+                    onChange((prev) => ({
+                      ...prev,
+                      assumptions: {
+                        ...prev.assumptions,
+                        ariaOperationsIncluded: e.target.checked
+                      }
+                    }))
+                  }
+                  className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
+                />
+                <span className="text-slate-300 font-medium">Include Aria Operations (+3% RAM / +2% CPU)</span>
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={wizardState.assumptions.ariaAutomationIncluded !== false}
+                  onChange={(e) =>
+                    onChange((prev) => ({
+                      ...prev,
+                      assumptions: {
+                        ...prev.assumptions,
+                        ariaAutomationIncluded: e.target.checked
+                      }
+                    }))
+                  }
+                  className="w-4 h-4 rounded accent-blue-600 cursor-pointer"
+                />
+                <span className="text-slate-300 font-medium">Include Aria Automation (+3% RAM / +2% CPU)</span>
+              </label>
+            </div>
           </div>
         )}
 

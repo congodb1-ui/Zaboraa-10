@@ -212,3 +212,40 @@ export function calculateStorageCapacity(input: StorageSizingInput): StorageSizi
     storageEfficiencyRatio
   };
 }
+
+/**
+ * Pure calculation of usable capacity from gross raw storage, storage policy, and slack space.
+ */
+export function calculateUsableStorage(
+  rawStorageTB: number,
+  policyId: StoragePolicyId,
+  slackFactor: number = 0.20,
+  efficiencyRatio: number = 1.0
+): { usableCapacityTB: number; rawStorageTB: number; policy: StoragePolicyDefinition } {
+  const policy = ENTERPRISE_STORAGE_POLICIES[policyId] || ENTERPRISE_STORAGE_POLICIES.raid1_ftt1;
+  const usable = Math.max(0, (rawStorageTB * (1 - slackFactor) * efficiencyRatio) / policy.overheadMultiplier);
+  return {
+    usableCapacityTB: usable,
+    rawStorageTB,
+    policy
+  };
+}
+
+/**
+ * Converts storage between decimal (TB, GB) and binary (TiB, GiB) units.
+ */
+export function convertStorageUnit(
+  value: number,
+  fromUnit: 'TB' | 'GB' | 'TiB' | 'GiB',
+  toUnit: 'TB' | 'GB' | 'TiB' | 'GiB'
+): number {
+  const bytesMap: Record<string, number> = {
+    TB: 1e12,
+    GB: 1e9,
+    TiB: Math.pow(1024, 4),
+    GiB: Math.pow(1024, 3)
+  };
+  const bytes = value * (bytesMap[fromUnit] || 1e12);
+  return bytes / (bytesMap[toUnit] || 1e12);
+}
+

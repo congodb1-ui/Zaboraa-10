@@ -243,7 +243,7 @@ export function calculateTotalInfrastructureCapacity(
 export function evaluateFailureScenario(
   clusters: ClusterNodeClass[],
   scenario: FailureScenarioConfig,
-  workloadDemandPerCluster: Record<string, { vcpu: number; ramGB: number; storageTB: number }>,
+  workloadDemandPerCluster: Record<string, { vcpu: number; ramGB: number; storageTB: number }> = {},
   assumptions: EngineeringAssumptions = DEFAULT_ENGINEERING_ASSUMPTIONS
 ): FailureScenarioResult {
   const clusterHeadrooms: SurvivingCapacityHeadroom[] = [];

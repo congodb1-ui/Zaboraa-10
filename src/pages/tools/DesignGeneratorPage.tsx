@@ -2439,61 +2439,152 @@ export const DesignGeneratorPage: React.FC = () => {
         onSelectStep={setCurrentStep}
         wizardState={wizardState}
         onApplyTemplate={handleApplyIndustryTemplate}
+        layoutMode={layoutMode}
+        onToggleLayoutMode={setLayoutMode}
         isCidrValid={sddcCidrValid}
         isCompatibilityValid={isCrossTierCompatible}
       />
 
       {/* 4-Step Architecture Wizard Workflow Container */}
       <div className="space-y-6">
-        {currentStep === 1 && (
-          <Step1ScopeAndSource
-            wizardState={wizardState}
-            onChange={handleWizardStateChange}
-            onNext={() => setCurrentStep(2)}
-          />
-        )}
+        {layoutMode === 'preview' ? (
+          <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+              <div>
+                <span className="text-xs font-mono text-cyan-400 uppercase font-semibold">
+                  Static 4K Architecture Vector Blueprint Preview
+                </span>
+                <h3 className="text-base font-bold text-white">{customerName} — {vectorSpec.title}</h3>
+                <p className="text-xs text-slate-400 font-mono mt-0.5">
+                  Architect: {architectName} · {calculatedCloudNodes}x {nodeSku} · DR: {drEngine}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleExport4K('png')}
+                  className="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download 4K PNG</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLayoutMode('form-only')}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold cursor-pointer transition"
+                >
+                  Return to 4-Step Wizard
+                </button>
+              </div>
+            </div>
 
-        {currentStep === 2 && (
-          <Step2TransitAndRouting
-            wizardState={wizardState}
-            onChange={handleWizardStateChange}
-            environments={topologyEnvironments}
-            onUpdateEnvironment={(id, updates) =>
-              setTopologyEnvironments((prev) =>
-                prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
-              )
-            }
-            onRemoveEnvironment={(id) => {
-              setPendingDeleteEnvId(id);
-              setShowDeleteEnvModal(true);
-            }}
-            onOpenAddEnvModal={() => setShowAddEnvModal(true)}
-            onNext={() => setCurrentStep(3)}
-            onPrev={() => setCurrentStep(1)}
-          />
-        )}
+            {/* 3-Panel Vector Blueprint Visual Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Panel 1 */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="text-xs font-bold text-cyan-400 uppercase font-mono tracking-wide border-b border-slate-800 pb-2">
+                  {vectorSpec.panel1Header}
+                </div>
+                {[vectorSpec.panel1Box1, vectorSpec.panel1Box2, vectorSpec.panel1Box3].map((box, bIdx) => (
+                  <div key={bIdx} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
+                    <div className="text-xs font-bold text-white">{box.title}</div>
+                    <ul className="space-y-0.5 text-[11px] text-slate-300 font-mono">
+                      {box.bullets.map((b, idx) => (
+                        <li key={idx}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
 
-        {currentStep === 3 && (
-          <Step3SecurityAndWAF
-            wizardState={wizardState}
-            onChange={handleWizardStateChange}
-            onNext={() => setCurrentStep(4)}
-            onPrev={() => setCurrentStep(2)}
-          />
-        )}
+              {/* Panel 2 */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="text-xs font-bold text-purple-400 uppercase font-mono tracking-wide border-b border-slate-800 pb-2">
+                  {vectorSpec.panel2Header}
+                </div>
+                {[vectorSpec.panel2Box1, vectorSpec.panel2Box2, vectorSpec.panel2Box3].map((box, bIdx) => (
+                  <div key={bIdx} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
+                    <div className="text-xs font-bold text-white">{box.title}</div>
+                    <ul className="space-y-0.5 text-[11px] text-slate-300 font-mono">
+                      {box.bullets.map((b, idx) => (
+                        <li key={idx}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
 
-        {currentStep === 4 && (
-          <Step4TargetAndDR
-            wizardState={wizardState}
-            onChange={handleWizardStateChange}
-            onPrev={() => setCurrentStep(3)}
-            onGenerateAI={() => setShowPreFlightModal(true)}
-            onSaveBlueprint={handlePersistLegacyState}
-            onExportJson={handleExportBlueprintJSON}
-            onExportExcel={handleExportBOMExcel}
-            onExport4K={() => handleExport4K('png')}
-            onOpenDossier={() => setShowDossierModal(true)}
-          />
+              {/* Panel 3 */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                <div className="text-xs font-bold text-emerald-400 uppercase font-mono tracking-wide border-b border-slate-800 pb-2">
+                  {vectorSpec.panel3Header}
+                </div>
+                {[vectorSpec.panel3Box1, vectorSpec.panel3Box2, vectorSpec.panel3Box3].map((box, bIdx) => (
+                  <div key={bIdx} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1.5">
+                    <div className="text-xs font-bold text-white">{box.title}</div>
+                    <ul className="space-y-0.5 text-[11px] text-slate-300 font-mono">
+                      {box.bullets.map((b, idx) => (
+                        <li key={idx}>{b}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            {currentStep === 1 && (
+              <Step1ScopeAndSource
+                wizardState={wizardState}
+                onChange={handleWizardStateChange}
+                onNext={() => setCurrentStep(2)}
+              />
+            )}
+
+            {currentStep === 2 && (
+              <Step2TransitAndRouting
+                wizardState={wizardState}
+                onChange={handleWizardStateChange}
+                environments={topologyEnvironments}
+                onUpdateEnvironment={(id, updates) =>
+                  setTopologyEnvironments((prev) =>
+                    prev.map((e) => (e.id === id ? { ...e, ...updates } : e))
+                  )
+                }
+                onRemoveEnvironment={(id) => {
+                  setPendingDeleteEnvId(id);
+                  setShowDeleteEnvModal(true);
+                }}
+                onOpenAddEnvModal={() => setShowAddEnvModal(true)}
+                onNext={() => setCurrentStep(3)}
+                onPrev={() => setCurrentStep(1)}
+              />
+            )}
+
+            {currentStep === 3 && (
+              <Step3SecurityAndWAF
+                wizardState={wizardState}
+                onChange={handleWizardStateChange}
+                onNext={() => setCurrentStep(4)}
+                onPrev={() => setCurrentStep(2)}
+              />
+            )}
+
+            {currentStep === 4 && (
+              <Step4TargetAndDR
+                wizardState={wizardState}
+                onChange={handleWizardStateChange}
+                onPrev={() => setCurrentStep(3)}
+                onGenerateAI={() => setShowPreFlightModal(true)}
+                onSaveBlueprint={handlePersistLegacyState}
+                onExportJson={handleExportBlueprintJSON}
+                onExportExcel={handleExportBOMExcel}
+                onExport4K={() => handleExport4K('png')}
+                onOpenDossier={() => setShowDossierModal(true)}
+              />
+            )}
+          </>
         )}
       </div>
 
